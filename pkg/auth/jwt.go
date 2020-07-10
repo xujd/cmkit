@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 //secret key
@@ -17,7 +18,7 @@ type ArithmeticCustomClaims struct {
 }
 
 // jwtKeyFunc 返回密钥
-func jwtKeyFunc(token *jwt.Token) (interface{}, error) {
+func JwtKeyFunc(token *jwt.Token) (interface{}, error) {
 	return secretKey, nil
 }
 

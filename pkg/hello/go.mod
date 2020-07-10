@@ -1,3 +1,3 @@
-module cmkit.hello
+module hello
 
 go 1.13

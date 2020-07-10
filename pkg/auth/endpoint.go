@@ -2,6 +2,8 @@ package auth
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -28,13 +30,13 @@ func MakeAuthEndpoint(svc Service) endpoint.Endpoint {
 		if err != nil {
 			resp = AuthResponse{
 				Success: err == nil,
-				Token:   token,
+				Token:   fmt.Sprintf("Bearer %s", token),
 				Error:   err.Error(),
 			}
 		} else {
 			resp = AuthResponse{
 				Success: err == nil,
-				Token:   token,
+				Token:   fmt.Sprintf("Bearer %s", token),
 			}
 		}
 

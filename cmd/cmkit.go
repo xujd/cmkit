@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/dgrijalva/jwt-go"
+	kitjwt "github.com/go-kit/kit/auth/jwt"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -15,6 +17,7 @@ import (
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 
 	"cmkit/pkg/auth"
+	"cmkit/pkg/hello"
 )
 
 func main() {
@@ -52,11 +55,21 @@ func main() {
 
 	svc = auth.NewLoggingMiddleware(log.With(logger, "component", "auth"), svc)
 	svc = auth.NewInstrumentingMiddleware(requestCount, requestLatency, svc)
-	httpLogger := log.With(logger, "component", "http")
 
+	var helloSvc hello.Service
+	helloSvc = hello.HelloService{}
+
+	helloSvc = hello.NewLoggingMiddleware(log.With(logger, "component", "hello"), helloSvc)
+	helloSvc = hello.NewInstrumentingMiddleware(requestCount, requestLatency, helloSvc)
+
+	helloEndpoint := hello.MakeHelloEndpoint(helloSvc)
+	helloEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(helloEndpoint)
+
+	httpLogger := log.With(logger, "component", "http")
 	mux := http.NewServeMux()
 
 	mux.Handle("/auth/", auth.MakeHandler(svc, httpLogger))
+	mux.Handle("/hello/", hello.MakeHandler(helloEndpoint, httpLogger))
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 
