@@ -1,9 +1,12 @@
 package auth
 
-import "errors"
+import (
+	"cmkit/pkg/utils"
+)
 
 type Service interface {
 	Login(name, pwd string) (string, error)
+	Renew(token string) (string, error)
 }
 type AuthService struct {
 }
@@ -14,5 +17,14 @@ func (s AuthService) Login(name, pwd string) (string, error) {
 		return token, err
 	}
 
-	return "", errors.New("Your name or password dismatch")
+	return "", utils.ErrUserPwdDismatch
+}
+
+func (s AuthService) Renew(oldToken string) (string, error) {
+	if oldToken != "" {
+		token, err := Resign(oldToken)
+		return token, err
+	}
+
+	return "", utils.ErrBadQueryParams
 }

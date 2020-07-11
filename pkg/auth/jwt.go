@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -9,8 +11,8 @@ import (
 //secret key
 var secretKey = []byte("abcd1234!@#$")
 
-// ArithmeticCustomClaims 自定义声明
-type ArithmeticCustomClaims struct {
+// AuthClaims 自定义声明
+type AuthClaims struct {
 	UserId string `json:"userId"`
 	Name   string `json:"name"`
 
@@ -27,7 +29,7 @@ func Sign(name, uid string) (string, error) {
 	// 过期时间
 	expAt := time.Now().Add(time.Duration(2) * time.Minute).Unix()
 
-	claims := ArithmeticCustomClaims{
+	claims := AuthClaims{
 		UserId: uid,
 		Name:   name,
 		StandardClaims: jwt.StandardClaims{
@@ -40,5 +42,18 @@ func Sign(name, uid string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	//生成token
-	return token.SignedString(secretKey)
+	tokenString, err := token.SignedString(secretKey)
+	return fmt.Sprintf("Bearer %s", tokenString), err
+}
+
+// Resign 续订token
+func Resign(oldToken string) (string, error) {
+	token, err := jwt.ParseWithClaims(strings.Replace(oldToken, "Bearer ", "", -1), &AuthClaims{}, JwtKeyFunc)
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(*AuthClaims); ok && token.Valid {
+		return Sign(claims.Name, claims.UserId)
+	}
+	return "", err
 }

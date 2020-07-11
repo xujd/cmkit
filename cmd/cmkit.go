@@ -31,7 +31,7 @@ func main() {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
-		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+		logger = log.With(logger, "ts", log.DefaultTimestamp)
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
@@ -50,11 +50,19 @@ func main() {
 		Help:      "Total duration of requests in microseconds.",
 	}, fieldKeys)
 
-	var svc auth.Service
-	svc = auth.AuthService{}
+	var authSvc auth.Service
+	authSvc = auth.AuthService{}
 
-	svc = auth.NewLoggingMiddleware(log.With(logger, "component", "auth"), svc)
-	svc = auth.NewInstrumentingMiddleware(requestCount, requestLatency, svc)
+	authSvc = auth.NewLoggingMiddleware(log.With(logger, "component", "auth"), authSvc)
+	authSvc = auth.NewInstrumentingMiddleware(requestCount, requestLatency, authSvc)
+	loginEndpoint := auth.MakeLoginEndpoint(authSvc)
+	renewEndpoint := auth.MakeRenewEndpoint(authSvc)
+	renewEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(renewEndpoint)
+
+	authEndpoints := auth.AuthEndpoints{
+		LoginEndpoint: loginEndpoint,
+		RenewEndpoint: renewEndpoint,
+	}
 
 	var helloSvc hello.Service
 	helloSvc = hello.HelloService{}
@@ -68,7 +76,7 @@ func main() {
 	httpLogger := log.With(logger, "component", "http")
 	mux := http.NewServeMux()
 
-	mux.Handle("/auth/", auth.MakeHandler(svc, httpLogger))
+	mux.Handle("/auth/", auth.MakeHandler(authEndpoints, httpLogger))
 	mux.Handle("/hello/", hello.MakeHandler(helloEndpoint, httpLogger))
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
@@ -90,7 +98,7 @@ func main() {
 func accessControl(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
 
 		if r.Method == "OPTIONS" {

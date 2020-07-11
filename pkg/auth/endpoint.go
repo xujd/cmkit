@@ -2,10 +2,15 @@ package auth
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-kit/kit/endpoint"
 )
+
+// AuthEndpoints
+type AuthEndpoints struct {
+	LoginEndpoint endpoint.Endpoint
+	RenewEndpoint endpoint.Endpoint
+}
 
 // AuthRequest
 type AuthRequest struct {
@@ -13,30 +18,42 @@ type AuthRequest struct {
 	Pwd  string `json:"pwd"`
 }
 
-// AuthResponse
-type AuthResponse struct {
-	Success bool   `json:"success"`
-	Token   string `json:"token"`
-	Error   string `json:"error"`
+// AuthToken
+type AuthToken struct {
+	Token string `json:"token"`
 }
 
-func MakeAuthEndpoint(svc Service) endpoint.Endpoint {
+func MakeLoginEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(AuthRequest)
 
 		token, err := svc.Login(req.Name, req.Pwd)
 
-		var resp AuthResponse
+		var resp AuthToken
 		if err != nil {
-			resp = AuthResponse{
-				Success: err == nil,
-				Token:   fmt.Sprintf("Bearer %s", token),
-				Error:   err.Error(),
-			}
+			return nil, err
 		} else {
-			resp = AuthResponse{
-				Success: err == nil,
-				Token:   fmt.Sprintf("Bearer %s", token),
+			resp = AuthToken{
+				Token: token,
+			}
+		}
+
+		return resp, nil
+	}
+}
+
+func MakeRenewEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(AuthToken)
+
+		token, err := svc.Renew(req.Token)
+
+		var resp AuthToken
+		if err != nil {
+			return nil, err
+		} else {
+			resp = AuthToken{
+				Token: token,
 			}
 		}
 

@@ -5,6 +5,7 @@ go 1.13
 require (
 	cmkit/pkg/auth v0.0.0-00010101000000-000000000000
 	cmkit/pkg/hello v0.0.0-00010101000000-000000000000
+	cmkit/pkg/utils v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/openzipkin/zipkin-go v0.2.2
@@ -15,3 +16,5 @@ require (
 replace cmkit/pkg/auth => ../pkg/auth
 
 replace cmkit/pkg/hello => ../pkg/hello
+
+replace cmkit/pkg/utils => ../pkg/utils

@@ -30,3 +30,16 @@ func (mw LoggingMiddleware) Login(name, pwd string) (token string, err error) {
 	token, err = mw.Service.Login(name, pwd)
 	return
 }
+
+func (mw LoggingMiddleware) Renew(oldToken string) (token string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "Renew",
+			"input", fmt.Sprintf("oldToken=%s", oldToken),
+			"result", token,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	token, err = mw.Service.Renew(oldToken)
+	return
+}
