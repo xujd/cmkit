@@ -14,10 +14,12 @@ type LoggingMiddleware struct {
 	Service
 }
 
+// NewLoggingMiddleware 日志
 func NewLoggingMiddleware(logger log.Logger, s Service) Service {
 	return &LoggingMiddleware{logger, s}
 }
 
+// Login 登录
 func (mw LoggingMiddleware) Login(name, pwd string) (token string, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log(
@@ -31,6 +33,7 @@ func (mw LoggingMiddleware) Login(name, pwd string) (token string, err error) {
 	return
 }
 
+// Renew 续订
 func (mw LoggingMiddleware) Renew(oldToken string) (token string, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log(

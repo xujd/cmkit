@@ -14,10 +14,12 @@ type LoggingMiddleware struct {
 	Service
 }
 
+// NewLoggingMiddleware New
 func NewLoggingMiddleware(logger log.Logger, s Service) Service {
 	return &LoggingMiddleware{logger, s}
 }
 
+// Hello Hello
 func (mw LoggingMiddleware) Hello(world string) (token string, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log(
