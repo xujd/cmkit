@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -17,15 +18,36 @@ import (
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 
 	"cmkit/pkg/auth"
+	"cmkit/pkg/db"
 	"cmkit/pkg/hello"
+
+	_ "github.com/lib/pq"
+)
+
+var (
+	VERSION    string
+	BUILD_TIME string
+	GO_VERSION string
+)
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "123456"
+	dbname   = "vdcdb"
 )
 
 func main() {
+	fmt.Printf("v%s\n%s\n%s\n", VERSION, BUILD_TIME, GO_VERSION)
 	var (
 		serviceHost = flag.String("service.host", "127.0.0.1", "service ip address")
 		servicePort = flag.String("service.port", "8089", "service port")
 	)
 	flag.Parse()
+
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
 
 	hostPort := *serviceHost + ":" + *servicePort
 	var logger log.Logger
@@ -50,6 +72,17 @@ func main() {
 		Help:      "Total duration of requests in microseconds.",
 	}, fieldKeys)
 
+	// database
+	dbLogger := log.With(logger, "component", "db")
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	pool := db.Init(psqlInfo, dbLogger)
+	defer pool.Close()
+	db.Ping(ctx, dbLogger)
+	db.Query(ctx, dbLogger)
+
+	// service
 	var authSvc auth.Service
 	authSvc = auth.AuthService{}
 
