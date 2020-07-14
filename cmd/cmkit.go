@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -18,10 +17,10 @@ import (
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 
 	"cmkit/pkg/auth"
-	"cmkit/pkg/db"
 	"cmkit/pkg/hello"
 
-	_ "github.com/lib/pq"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 var (
@@ -30,24 +29,18 @@ var (
 	GO_VERSION string
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "123456"
-	dbname   = "vdcdb"
-)
-
 func main() {
 	fmt.Printf("v%s\n%s\n%s\n", VERSION, BUILD_TIME, GO_VERSION)
 	var (
 		serviceHost = flag.String("service.host", "127.0.0.1", "service ip address")
 		servicePort = flag.String("service.port", "8089", "service port")
+		dbHost      = flag.String("db.host", "127.0.0.1", "db ip address")
+		dbPort      = flag.Int("db.port", 5432, "db port")
+		dbUser      = flag.String("db.user", "postgres", "db user")
+		dbPasswd    = flag.String("db.passwd", "123456", "db password")
+		dbName      = flag.String("db.name", "cmkit", "db name")
 	)
 	flag.Parse()
-
-	ctx, stop := context.WithCancel(context.Background())
-	defer stop()
 
 	hostPort := *serviceHost + ":" + *servicePort
 	var logger log.Logger
@@ -57,6 +50,18 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
+	// database
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		*dbHost, *dbPort, *dbUser, *dbPasswd, *dbName)
+	logger.Log("database string", psqlInfo)
+	db, err := gorm.Open("postgres", psqlInfo)
+	if err != nil {
+		logger.Log("database error", err)
+		return
+	}
+	defer db.Close()
+
+	// instrumenting
 	fieldKeys := []string{"method"}
 	requestCount := kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "CMKIT",
@@ -72,29 +77,21 @@ func main() {
 		Help:      "Total duration of requests in microseconds.",
 	}, fieldKeys)
 
-	// database
-	dbLogger := log.With(logger, "component", "db")
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-	pool := db.Init(psqlInfo, dbLogger)
-	defer pool.Close()
-	db.Ping(ctx, dbLogger)
-	db.Query(ctx, dbLogger)
-
 	// service
 	var authSvc auth.Service
-	authSvc = auth.AuthService{}
+	authSvc = auth.AuthService{
+		DbHandler: db,
+	}
 
 	authSvc = auth.NewLoggingMiddleware(log.With(logger, "component", "auth"), authSvc)
 	authSvc = auth.NewInstrumentingMiddleware(requestCount, requestLatency, authSvc)
 	loginEndpoint := auth.MakeLoginEndpoint(authSvc)
-	renewEndpoint := auth.MakeRenewEndpoint(authSvc)
-	renewEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(renewEndpoint)
+	renewvalEndpoint := auth.MakeRenewvalEndpoint(authSvc)
+	renewvalEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(renewvalEndpoint)
 
 	authEndpoints := auth.AuthEndpoints{
-		LoginEndpoint: loginEndpoint,
-		RenewEndpoint: renewEndpoint,
+		LoginEndpoint:    loginEndpoint,
+		RenewvalEndpoint: renewvalEndpoint,
 	}
 
 	var helloSvc hello.Service

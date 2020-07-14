@@ -32,12 +32,12 @@ func (s *InstrumentingMiddleware) Login(name, pwd string) (string, error) {
 	return s.Service.Login(name, pwd)
 }
 
-// Renew 续订
-func (s *InstrumentingMiddleware) Renew(oldToken string) (string, error) {
+// Renewval 续订
+func (s *InstrumentingMiddleware) Renewval(oldToken string) (string, error) {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "renew").Add(1)
-		s.requestLatency.With("method", "renew").Observe(time.Since(begin).Seconds())
+		s.requestCount.With("method", "Renewval").Add(1)
+		s.requestLatency.With("method", "Renewval").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.Service.Renew(oldToken)
+	return s.Service.Renewval(oldToken)
 }

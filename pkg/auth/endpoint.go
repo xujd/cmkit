@@ -9,7 +9,7 @@ import (
 // AuthEndpoints 权限的Endpoint
 type AuthEndpoints struct {
 	LoginEndpoint endpoint.Endpoint
-	RenewEndpoint endpoint.Endpoint
+	RenewvalEndpoint endpoint.Endpoint
 }
 
 // AuthRequest 登录请求
@@ -42,12 +42,12 @@ func MakeLoginEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 
-// MakeRenewEndpoint 创建续订Endpoint
-func MakeRenewEndpoint(svc Service) endpoint.Endpoint {
+// MakeRenewvalEndpoint 创建续订Endpoint
+func MakeRenewvalEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(AuthToken)
 
-		token, err := svc.Renew(req.Token)
+		token, err := svc.Renewval(req.Token)
 
 		var resp AuthToken
 		if err != nil {

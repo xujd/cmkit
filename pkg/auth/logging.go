@@ -33,16 +33,16 @@ func (mw LoggingMiddleware) Login(name, pwd string) (token string, err error) {
 	return
 }
 
-// Renew 续订
-func (mw LoggingMiddleware) Renew(oldToken string) (token string, err error) {
+// Renewval 续订
+func (mw LoggingMiddleware) Renewval(oldToken string) (token string, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log(
-			"function", "Renew",
+			"function", "Renewval",
 			"input", fmt.Sprintf("oldToken=%s", oldToken),
 			"result", token,
 			"took", time.Since(begin),
 		)
 	}(time.Now())
-	token, err = mw.Service.Renew(oldToken)
+	token, err = mw.Service.Renewval(oldToken)
 	return
 }

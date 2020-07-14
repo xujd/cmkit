@@ -33,14 +33,14 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 
 	r.Handle("/auth/login", loginHandler).Methods("POST")
 
-	renewHandler := kithttp.NewServer(
-		endpoints.RenewEndpoint,
-		decodeRenewRequest,
+	renewvalHandler := kithttp.NewServer(
+		endpoints.RenewvalEndpoint,
+		decodeRenewvalRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
 
-	r.Handle("/auth/renew", renewHandler).Methods("GET")
+	r.Handle("/auth/renewval", renewvalHandler).Methods("GET")
 
 	return r
 }
@@ -53,7 +53,7 @@ func decodeLoginRequest(_ context.Context, r *http.Request) (interface{}, error)
 	return loginRequest, nil
 }
 
-func decodeRenewRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeRenewvalRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	req := AuthToken{
 		Token: r.Header["Authorization"][0],
 	}
