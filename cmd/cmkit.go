@@ -80,19 +80,12 @@ func main() {
 	// service
 	var authSvc auth.Service
 	authSvc = auth.AuthService{
-		DbHandler: db,
+		DB: db,
 	}
 
 	authSvc = auth.NewLoggingMiddleware(log.With(logger, "component", "auth"), authSvc)
 	authSvc = auth.NewInstrumentingMiddleware(requestCount, requestLatency, authSvc)
-	loginEndpoint := auth.MakeLoginEndpoint(authSvc)
-	renewvalEndpoint := auth.MakeRenewvalEndpoint(authSvc)
-	renewvalEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(renewvalEndpoint)
-
-	authEndpoints := auth.AuthEndpoints{
-		LoginEndpoint:    loginEndpoint,
-		RenewvalEndpoint: renewvalEndpoint,
-	}
+	authEndpoints := auth.CreateEndpoints(authSvc)
 
 	var helloSvc hello.Service
 	helloSvc = hello.HelloService{}

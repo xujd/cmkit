@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"cmkit/pkg/models"
 	"fmt"
 	"time"
 
@@ -44,5 +45,47 @@ func (mw LoggingMiddleware) Renewval(oldToken string) (token string, err error) 
 		)
 	}(time.Now())
 	token, err = mw.Service.Renewval(oldToken)
+	return
+}
+
+// AddUser 添加用户
+func (mw LoggingMiddleware) AddUser(user models.User) (result string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "AddUser",
+			"input", fmt.Sprintf("user=%s", user),
+			"result", result,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.AddUser(user)
+	return
+}
+
+// UpdateUser 修改用户
+func (mw LoggingMiddleware) UpdateUser(user models.User) (result string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "UpdateUser",
+			"input", fmt.Sprintf("user=%s", user),
+			"result", result,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.UpdateUser(user)
+	return
+}
+
+// DeleteUser 删除用户
+func (mw LoggingMiddleware) DeleteUser(id uint) (result string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "DeleteUser",
+			"input", fmt.Sprintf("id=%s", id),
+			"result", result,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.DeleteUser(id)
 	return
 }

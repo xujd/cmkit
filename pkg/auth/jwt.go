@@ -27,7 +27,7 @@ func JwtKeyFunc(token *jwt.Token) (interface{}, error) {
 // Sign 生成token
 func Sign(name, uid string) (string, error) {
 	// 过期时间
-	expAt := time.Now().Add(time.Duration(10) * time.Minute).Unix()
+	expAt := time.Now().Add(time.Duration(30) * time.Minute).Unix()
 
 	claims := AuthClaims{
 		UserId: uid,
