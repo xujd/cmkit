@@ -72,3 +72,23 @@ func (s *InstrumentingMiddleware) DeleteUser(id uint) (string, error) {
 
 	return s.Service.DeleteUser(id)
 }
+
+// QueryUserByID 查询用户
+func (s InstrumentingMiddleware) QueryUserByID(id uint) (result *models.User, err error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "QueryUserByID").Add(1)
+		s.requestLatency.With("method", "QueryUserByID").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.QueryUserByID(id)
+}
+
+// ListUsers 查询用户列表
+func (s InstrumentingMiddleware) ListUsers(name string, pageIndex int, pageSize int) (result *models.SearchResult, err error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "ListUsers").Add(1)
+		s.requestLatency.With("method", "ListUsers").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.ListUsers(name, pageIndex, pageSize)
+}

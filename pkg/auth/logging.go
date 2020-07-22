@@ -81,11 +81,39 @@ func (mw LoggingMiddleware) DeleteUser(id uint) (result string, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log(
 			"function", "DeleteUser",
-			"input", fmt.Sprintf("id=%s", id),
+			"input", fmt.Sprintf("id=%d", id),
 			"result", result,
 			"took", time.Since(begin),
 		)
 	}(time.Now())
 	result, err = mw.Service.DeleteUser(id)
+	return
+}
+
+// QueryUserByID 查询用户
+func (mw LoggingMiddleware) QueryUserByID(id uint) (result *models.User, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "QueryUserByID",
+			"input", fmt.Sprintf("id=%d", id),
+			"result", fmt.Sprintf("%+v", result),
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.QueryUserByID(id)
+	return
+}
+
+// ListUsers 查询用户列表
+func (mw LoggingMiddleware) ListUsers(name string, pageIndex int, pageSize int) (result *models.SearchResult, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "ListUsers",
+			"input", fmt.Sprintf("name=%s, pageIndex=%d, pageSize=%d", name, pageIndex, pageSize),
+			"result", fmt.Sprintf("%+v", result),
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.ListUsers(name, pageIndex, pageSize)
 	return
 }

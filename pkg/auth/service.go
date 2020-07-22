@@ -5,18 +5,26 @@ import (
 	"cmkit/pkg/utils"
 	"crypto/sha256"
 	"fmt"
+	"math"
 
 	"github.com/jinzhu/gorm"
 )
 
 // Service 服务接口
 type Service interface {
+	// 添加用户
 	AddUser(user models.User) (string, error)
+	// 修改用户
 	UpdateUser(user models.User) (string, error)
+	// 删除用户
 	DeleteUser(id uint) (string, error)
+	// 查询用户
 	QueryUserByID(id uint) (*models.User, error)
-	ListUsers() (*[]models.User, error)
+	// 查询用户列表
+	ListUsers(name string, pageIndex int, pageSize int) (*models.SearchResult, error)
+	// 登录验证
 	Login(name, pwd string) (string, error)
+	// token续订
 	Renewval(token string) (string, error)
 }
 
@@ -95,7 +103,7 @@ func (s AuthService) QueryUserByName(name string) (*models.User, error) {
 		return nil, utils.ErrNotFound
 	}
 	var user models.User
-	if err := s.DB.Unscoped().Where("name = ?", name).First(&user).Error; err != nil {
+	if err := s.DB.Where("name = ?", name).First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -108,7 +116,7 @@ func (s AuthService) QueryUserByID(id uint) (*models.User, error) {
 		return nil, utils.ErrNotFound
 	}
 	var user models.User
-	if err := s.DB.Unscoped().Select("id,created_at,updated_at,deleted_at,name,start_time,end_time,status,remark").Where("id = ?", id).First(&user).Error; err != nil {
+	if err := s.DB.Select("id,created_at,updated_at,deleted_at,name,start_time,end_time,status,remark").Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -116,16 +124,30 @@ func (s AuthService) QueryUserByID(id uint) (*models.User, error) {
 }
 
 // ListUsers 查询用户
-func (s AuthService) ListUsers() (*[]models.User, error) {
+func (s AuthService) ListUsers(name string, pageIndex int, pageSize int) (*models.SearchResult, error) {
 	if !s.DB.HasTable(&models.User{}) {
 		return nil, utils.ErrNotFound
 	}
+	userdb := s.DB.Model(&models.User{})
+	if name != "" {
+		userdb = s.DB.Model(&models.User{}).Where("name LIKE ?", "%"+name+"%")
+	}
+	if pageIndex == 0 {
+		pageIndex = 1
+	}
+	if pageSize == 0 {
+		pageSize = 10
+	}
+	var rowCount int
+	userdb.Count(&rowCount)                                            //总行数
+	pageCount := int(math.Ceil(float64(rowCount) / float64(pageSize))) // 总页数
+
 	var users []models.User
-	if err := s.DB.Unscoped().Select("id,created_at,updated_at,deleted_at,name,start_time,end_time,status,remark").Find(&users).Error; err != nil {
+	if err := userdb.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Select("id,created_at,updated_at,deleted_at,name,start_time,end_time,status,remark").Find(&users).Error; err != nil {
 		return nil, err
 	}
 
-	return &users, nil
+	return &models.SearchResult{Total: rowCount, PageIndex: pageIndex, PageSize: pageSize, PageCount: pageCount, List: &users}, nil
 }
 
 // Login 登录

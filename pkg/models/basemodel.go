@@ -21,15 +21,15 @@ func (t JSONTime) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON 反序列化JSON
-func (l *JSONTime) UnmarshalJSON(b []byte) error {
+func (t *JSONTime) UnmarshalJSON(b []byte) error {
 	now, err := time.ParseInLocation(`"`+localDateTimeFormat+`"`, string(b), time.Local)
-	*l = JSONTime(now)
+	*t = JSONTime(now)
 	return err
 }
 
 // String 字符串格式化
-func (l JSONTime) String() string {
-	return time.Time(l).Format(localDateTimeFormat)
+func (t JSONTime) String() string {
+	return time.Time(t).Format(localDateTimeFormat)
 }
 
 // Value insert timestamp into mysql need this function.
@@ -58,4 +58,13 @@ type BaseModel struct {
 	CreatedAt JSONTime  `json:"createAt"`
 	UpdatedAt JSONTime  `json:"updateAt"`
 	DeletedAt *JSONTime `json:"deleteAt"`
+}
+
+// SearchResult 查询结果列表
+type SearchResult struct {
+	Total     int         `json:total`
+	PageIndex int         `json:pageIndex`
+	PageSize  int         `json:pageSize`
+	PageCount int         `json:pageCount`
+	List      interface{} `json:list`
 }

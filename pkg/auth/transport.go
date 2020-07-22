@@ -85,7 +85,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 查询用户
 	listUsersHandler := kithttp.NewServer(
 		endpoints.ListUsersEndpoint,
-		decodeRenewvalRequest,
+		decodeUserListRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -133,4 +133,21 @@ func decodeUserIDRequest(_ context.Context, r *http.Request) (interface{}, error
 	}
 	userID, _ := strconv.Atoi(id)
 	return models.BaseModel{ID: uint(userID)}, nil
+}
+
+func decodeUserListRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := r.URL.Query()
+	name := vars.Get("name")
+	size := vars.Get("pageSize")
+	index := vars.Get("pageIndex")
+	pageSize, err := strconv.Atoi(size)
+	if err != nil {
+		pageSize = 10
+	}
+	pageIndex, err2 := strconv.Atoi(index)
+	if err2 != nil {
+		pageIndex = 1
+	}
+
+	return map[string]interface{}{"name": name, "pageSize": pageSize, "pageIndex": pageIndex}, nil
 }

@@ -161,9 +161,8 @@ func MakeQueryUserByIDEndpoint(svc Service) endpoint.Endpoint {
 // MakeListUsersEndpoint 查询用户列表
 func MakeListUsersEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		// req := request.(models.BaseModel)
-
-		result, err := svc.ListUsers()
+		req := request.(map[string]interface{})
+		result, err := svc.ListUsers(req["name"].(string), req["pageIndex"].(int), req["pageSize"].(int))
 
 		if err != nil {
 			return nil, err
