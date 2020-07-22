@@ -1,2 +1,4 @@
 *.exe
 go.sum
+node_modules
+dist
