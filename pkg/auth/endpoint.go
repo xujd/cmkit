@@ -18,11 +18,13 @@ type AuthEndpoints struct {
 	DeleteUserEndpoint    endpoint.Endpoint
 	QueryUserByIDEndpoint endpoint.Endpoint
 	ListUsersEndpoint     endpoint.Endpoint
+	GetUserInfoEndpoint   endpoint.Endpoint
+	LogoutEndpoint        endpoint.Endpoint
 }
 
 // AuthRequest 登录请求
 type AuthRequest struct {
-	Name     string `json:"name"`
+	UserName string `json:"username"`
 	Password string `json:"password"`
 }
 
@@ -46,6 +48,10 @@ func CreateEndpoints(svc Service) AuthEndpoints {
 	queryUserByIDEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(queryUserByIDEndpoint)
 	listUsersEndpoint := MakeListUsersEndpoint(svc)
 	listUsersEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(listUsersEndpoint)
+	getUserInfoEndpoint := MakeGetUserInfoEndpoint(svc)
+	getUserInfoEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(getUserInfoEndpoint)
+	logoutEndpoint := MakeLogoutEndpoint(svc)
+	logoutEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(logoutEndpoint)
 
 	authEndpoints := AuthEndpoints{
 		LoginEndpoint:         loginEndpoint,
@@ -55,6 +61,8 @@ func CreateEndpoints(svc Service) AuthEndpoints {
 		DeleteUserEndpoint:    deleteUserEndpoint,
 		QueryUserByIDEndpoint: queryUserByIDEndpoint,
 		ListUsersEndpoint:     listUsersEndpoint,
+		GetUserInfoEndpoint:   getUserInfoEndpoint,
+		LogoutEndpoint:        logoutEndpoint,
 	}
 
 	return authEndpoints
@@ -65,7 +73,7 @@ func MakeLoginEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(AuthRequest)
 
-		token, err := svc.Login(req.Name, req.Password)
+		token, err := svc.Login(req.UserName, req.Password)
 
 		var resp AuthToken
 		if err != nil {
@@ -169,5 +177,29 @@ func MakeListUsersEndpoint(svc Service) endpoint.Endpoint {
 		}
 
 		return result, nil
+	}
+}
+
+// MakeGetUserInfoEndpoint 获取用户信息
+func MakeGetUserInfoEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(AuthToken)
+		data, err := svc.GetUserInfo(req.Token)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	}
+}
+
+// MakeLogoutEndpoint 退出登录
+func MakeLogoutEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(AuthToken)
+		data, err := svc.Logout(req.Token)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
 	}
 }

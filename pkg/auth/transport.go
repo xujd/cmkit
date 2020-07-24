@@ -91,6 +91,26 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	)
 
 	r.Handle("/auth/users", listUsersHandler).Methods("GET")
+	// 查询用户信息
+	getUserInfoHandler := kithttp.NewServer(
+		endpoints.GetUserInfoEndpoint,
+		decodeRenewvalRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/userinfo", getUserInfoHandler).Methods("GET")
+
+	// 退出登录
+	logoutHandler := kithttp.NewServer(
+		endpoints.LogoutEndpoint,
+		decodeRenewvalRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/logout", logoutHandler).Methods("GET")
+
 	return r
 }
 

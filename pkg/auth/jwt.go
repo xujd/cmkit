@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	kitjwt "github.com/go-kit/kit/auth/jwt"
 )
 
 //secret key
@@ -48,12 +49,23 @@ func Sign(name, uid string) (string, error) {
 
 // Resign 续订token
 func Resign(oldToken string) (string, error) {
-	token, err := jwt.ParseWithClaims(strings.Replace(oldToken, "Bearer ", "", -1), &AuthClaims{}, JwtKeyFunc)
+	claims, err := ParseToken(oldToken)
 	if err != nil {
 		return "", err
 	}
-	if claims, ok := token.Claims.(*AuthClaims); ok && token.Valid {
-		return Sign(claims.Name, claims.UserId)
+
+	return Sign(claims.Name, claims.UserId)
+}
+
+// ParseToken 解析token
+func ParseToken(token string) (*AuthClaims, error) {
+	data, err := jwt.ParseWithClaims(strings.Replace(token, "Bearer ", "", -1), &AuthClaims{}, JwtKeyFunc)
+	if err != nil {
+		return nil, err
 	}
-	return "", err
+	if claims, ok := data.Claims.(*AuthClaims); ok && data.Valid {
+		return claims, nil
+	}
+
+	return nil, kitjwt.ErrTokenInvalid
 }

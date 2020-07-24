@@ -26,8 +26,8 @@ func NewInstrumentingMiddleware(counter metrics.Counter, latency metrics.Histogr
 // Login 登录
 func (s *InstrumentingMiddleware) Login(name, pwd string) (string, error) {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "login").Add(1)
-		s.requestLatency.With("method", "login").Observe(time.Since(begin).Seconds())
+		s.requestCount.With("method", "Login").Add(1)
+		s.requestLatency.With("method", "Login").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return s.Service.Login(name, pwd)
@@ -91,4 +91,24 @@ func (s InstrumentingMiddleware) ListUsers(name string, pageIndex int, pageSize 
 	}(time.Now())
 
 	return s.Service.ListUsers(name, pageIndex, pageSize)
+}
+
+// GetUserInfo 查询用户信息
+func (s InstrumentingMiddleware) GetUserInfo(token string) (result *models.UserInfo, err error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "GetUserInfo").Add(1)
+		s.requestLatency.With("method", "GetUserInfo").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.GetUserInfo(token)
+}
+
+// Logout 退出登录
+func (s InstrumentingMiddleware) Logout(token string) (result string, err error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "Logout").Add(1)
+		s.requestLatency.With("method", "Logout").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.Logout(token)
 }

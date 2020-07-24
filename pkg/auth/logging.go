@@ -117,3 +117,31 @@ func (mw LoggingMiddleware) ListUsers(name string, pageIndex int, pageSize int) 
 	result, err = mw.Service.ListUsers(name, pageIndex, pageSize)
 	return
 }
+
+// GetUserInfo 获取用户信息
+func (mw LoggingMiddleware) GetUserInfo(token string) (result *models.UserInfo, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "GetUserInfo",
+			"input", fmt.Sprintf("token=%s", token),
+			"result", fmt.Sprintf("%+v", result),
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.GetUserInfo(token)
+	return
+}
+
+// Logout 获取用户信息
+func (mw LoggingMiddleware) Logout(token string) (result string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "Logout",
+			"input", fmt.Sprintf("token=%s", token),
+			"result", result,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.Logout(token)
+	return
+}

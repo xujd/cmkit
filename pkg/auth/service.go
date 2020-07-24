@@ -26,6 +26,10 @@ type Service interface {
 	Login(name, pwd string) (string, error)
 	// token续订
 	Renewval(token string) (string, error)
+	// 获取用户信息
+	GetUserInfo(token string) (*models.UserInfo, error)
+	// 退出登录
+	Logout(token string) (string, error)
 }
 
 // AuthService 权限服务
@@ -177,4 +181,27 @@ func (s AuthService) Renewval(oldToken string) (string, error) {
 	}
 
 	return "", utils.ErrBadQueryParams
+}
+
+// GetUserInfo 用户信息
+func (s AuthService) GetUserInfo(token string) (*models.UserInfo, error) {
+	if token != "" {
+		claims, err := ParseToken(token)
+		if err != nil {
+			return nil, err
+		}
+
+		return &models.UserInfo{
+			Roles:        []string{"admin"},
+			Introduction: "I am a super administrator",
+			Avatar:       "./assets/user.gif",
+			Name:         claims.Name,
+		}, nil
+	}
+	return nil, utils.ErrBadQueryParams
+}
+
+// Logout 退出登录
+func (s AuthService) Logout(token string) (string, error) {
+	return "success", nil
 }

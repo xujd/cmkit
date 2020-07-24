@@ -16,3 +16,11 @@ type User struct {
 func (User) TableName() string {
 	return "auth_user"
 }
+
+// UserInfo 用户信息
+type UserInfo struct {
+	Roles        []string `json:"roles"`
+	Introduction string   `json:"introduction"`
+	Avatar       string   `json:"avatar"`
+	Name         string   `json:"name"`
+}
