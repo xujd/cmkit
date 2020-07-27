@@ -55,9 +55,9 @@ func (t *JSONTime) Scan(v interface{}) error {
 // BaseModel 基本模型定义
 type BaseModel struct {
 	ID        uint      `json:"id" gorm:"primary_key"`
-	CreatedAt JSONTime  `json:"createAt"`
-	UpdatedAt JSONTime  `json:"updateAt"`
-	DeletedAt *JSONTime `json:"deleteAt"`
+	CreatedAt JSONTime  `json:"createAt" gorm:"type:timestamp"`
+	UpdatedAt JSONTime  `json:"updateAt" gorm:"type:timestamp"`
+	DeletedAt *JSONTime `json:"deleteAt" gorm:"type:timestamp"`
 }
 
 // SearchResult 查询结果列表

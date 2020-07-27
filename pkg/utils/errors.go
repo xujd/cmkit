@@ -19,4 +19,10 @@ var (
 	ErrUserStatus = errors.New("用户状态异常")
 	// ErrBadQueryParams 查询参数错误
 	ErrBadQueryParams = errors.New("查询参数错误")
+	// ErrRoleNameIsNull 角色名称为空
+	ErrRoleNameIsNull = errors.New("角色名称为空")
+	// ErrRoleAlreadyExists 角色已存在
+	ErrRoleAlreadyExists = errors.New("角色已存在")
+	// ErrRoleNotFound 角色不存在
+	ErrRoleNotFound = errors.New("角色不存在")
 )

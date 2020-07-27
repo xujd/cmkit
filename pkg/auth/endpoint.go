@@ -20,6 +20,11 @@ type AuthEndpoints struct {
 	ListUsersEndpoint     endpoint.Endpoint
 	GetUserInfoEndpoint   endpoint.Endpoint
 	LogoutEndpoint        endpoint.Endpoint
+	AddRoleEndpoint       endpoint.Endpoint
+	UpdateRoleEndpoint    endpoint.Endpoint
+	DeleteRoleEndpoint    endpoint.Endpoint
+	ListRolesEndpoint     endpoint.Endpoint
+	SetUserRoleEndpoint   endpoint.Endpoint
 }
 
 // AuthRequest 登录请求
@@ -38,6 +43,9 @@ func CreateEndpoints(svc Service) AuthEndpoints {
 	loginEndpoint := MakeLoginEndpoint(svc)
 	renewvalEndpoint := MakeRenewvalEndpoint(svc)
 	renewvalEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(renewvalEndpoint)
+	logoutEndpoint := MakeLogoutEndpoint(svc)
+	logoutEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(logoutEndpoint)
+
 	addUserEndpoint := MakeAddUserEndpoint(svc)
 	addUserEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(addUserEndpoint)
 	updateUserEndpoint := MakeUpdateUserEndpoint(svc)
@@ -50,8 +58,18 @@ func CreateEndpoints(svc Service) AuthEndpoints {
 	listUsersEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(listUsersEndpoint)
 	getUserInfoEndpoint := MakeGetUserInfoEndpoint(svc)
 	getUserInfoEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(getUserInfoEndpoint)
-	logoutEndpoint := MakeLogoutEndpoint(svc)
-	logoutEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(logoutEndpoint)
+
+	addRoleEndpoint := MakeAddRoleEndpoint(svc)
+	addRoleEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(addRoleEndpoint)
+	updateRoleEndpoint := MakeUpdateRoleEndpoint(svc)
+	updateRoleEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(updateRoleEndpoint)
+	deleteRoleEndpoint := MakeDeleteRoleEndpoint(svc)
+	deleteRoleEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(deleteRoleEndpoint)
+	listRolesEndpoint := MakeListRolesEndpoint(svc)
+	listRolesEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(listRolesEndpoint)
+
+	setUserRoleEndpoint := MakeSetUserRoleEndpoint(svc)
+	setUserRoleEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(setUserRoleEndpoint)
 
 	authEndpoints := AuthEndpoints{
 		LoginEndpoint:         loginEndpoint,
@@ -63,6 +81,11 @@ func CreateEndpoints(svc Service) AuthEndpoints {
 		ListUsersEndpoint:     listUsersEndpoint,
 		GetUserInfoEndpoint:   getUserInfoEndpoint,
 		LogoutEndpoint:        logoutEndpoint,
+		AddRoleEndpoint:       addRoleEndpoint,
+		UpdateRoleEndpoint:    updateRoleEndpoint,
+		DeleteRoleEndpoint:    deleteRoleEndpoint,
+		ListRolesEndpoint:     listRolesEndpoint,
+		SetUserRoleEndpoint:   setUserRoleEndpoint,
 	}
 
 	return authEndpoints
@@ -201,5 +224,82 @@ func MakeLogoutEndpoint(svc Service) endpoint.Endpoint {
 			return nil, err
 		}
 		return data, nil
+	}
+}
+
+// MakeAddRoleEndpoint 添加角色
+func MakeAddRoleEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.Role)
+
+		result, err := svc.AddRole(req)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeUpdateRoleEndpoint 修改角色
+func MakeUpdateRoleEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.Role)
+
+		result, err := svc.UpdateRole(req)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeDeleteRoleEndpoint 删除角色
+func MakeDeleteRoleEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.BaseModel)
+
+		result, err := svc.DeleteRole(req.ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeListRolesEndpoint 查询用户列表
+func MakeListRolesEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(map[string]interface{})
+		result, err := svc.ListRoles(req["name"].(string), req["pageIndex"].(int), req["pageSize"].(int))
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeSetUserRoleEndpoint 设置用户角色
+func MakeSetUserRoleEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(map[string]interface{})
+		roleIds := make([]uint, len(req["roleIds"].([]interface{})))
+		for i, value := range req["roleIds"].([]interface{}) {
+			roleIds[i] = uint(value.(float64))
+		}
+		result, err := svc.SetUserRole(uint(req["userId"].(float64)), roleIds)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
 	}
 }

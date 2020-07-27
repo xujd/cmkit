@@ -82,7 +82,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	)
 
 	r.Handle("/auth/user/{id}", queryUserByIDHandler).Methods("GET")
-	// 查询用户
+	// 查询用户列表
 	listUsersHandler := kithttp.NewServer(
 		endpoints.ListUsersEndpoint,
 		decodeUserListRequest,
@@ -110,6 +110,55 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	)
 
 	r.Handle("/auth/logout", logoutHandler).Methods("GET")
+
+	// 添加角色
+	addRoleHandler := kithttp.NewServer(
+		endpoints.AddRoleEndpoint,
+		decodeAddRoleRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/role", addRoleHandler).Methods("POST")
+	// 修改角色
+	updateRoleHandler := kithttp.NewServer(
+		endpoints.UpdateRoleEndpoint,
+		decodeUpdateRoleRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/role", updateRoleHandler).Methods("PUT")
+
+	// 删除角色
+	deleteRoleHandler := kithttp.NewServer(
+		endpoints.DeleteRoleEndpoint,
+		decodeUserIDRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/role/{id}", deleteRoleHandler).Methods("DELETE")
+
+	// 查询角色列表
+	listRolesHandler := kithttp.NewServer(
+		endpoints.ListRolesEndpoint,
+		decodeUserListRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/roles", listRolesHandler).Methods("GET")
+
+	// 设置用户角色
+	setUserRoleHandler := kithttp.NewServer(
+		endpoints.SetUserRoleEndpoint,
+		decodeUserRoleRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/userrole", setUserRoleHandler).Methods("POST")
 
 	return r
 }
@@ -170,4 +219,28 @@ func decodeUserListRequest(_ context.Context, r *http.Request) (interface{}, err
 	}
 
 	return map[string]interface{}{"name": name, "pageSize": pageSize, "pageIndex": pageIndex}, nil
+}
+
+func decodeAddRoleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var role models.Role
+	if err := json.NewDecoder(r.Body).Decode(&role); err != nil {
+		return nil, err
+	}
+	return role, nil
+}
+
+func decodeUpdateRoleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var role models.Role
+	if err := json.NewDecoder(r.Body).Decode(&role); err != nil {
+		return nil, err
+	}
+	return role, nil
+}
+
+func decodeUserRoleRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var data map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		return nil, err
+	}
+	return data, nil
 }

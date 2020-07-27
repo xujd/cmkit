@@ -17,5 +17,5 @@ type Staff struct {
 
 // TableName staff表
 func (Staff) TableName() string {
-	return "auth_staff"
+	return "t_auth_staff"
 }

@@ -30,6 +30,20 @@ type Service interface {
 	GetUserInfo(token string) (*models.UserInfo, error)
 	// 退出登录
 	Logout(token string) (string, error)
+	// 添加角色
+	AddRole(role models.Role) (string, error)
+	// 修改角色
+	UpdateRole(role models.Role) (string, error)
+	// 删除角色
+	DeleteRole(id uint) (string, error)
+	// 查询角色列表
+	ListRoles(name string, pageIndex int, pageSize int) (*models.SearchResult, error)
+	// 设置用户角色
+	SetUserRole(userID uint, roleIDs []uint) (string, error)
+	// 设置角色权限
+	SetRoleFuncs(roleID uint, funcs []uint) (string, error)
+	// 获取角色权限
+	GetRoleFuncs(roleID uint) (string, error)
 }
 
 // AuthService 权限服务
@@ -191,9 +205,19 @@ func (s AuthService) GetUserInfo(token string) (*models.UserInfo, error) {
 			return nil, err
 		}
 
+		user, err := s.QueryUserByName(claims.Name)
+		if err != nil {
+			return nil, utils.ErrUserNotFound
+		}
+
+		var userRoles models.UserRoleRelation
+		if err : = s.DB.Where("user_id = ?", user.ID).Find(&userRoles).Error; err != nil {
+			return nil, err
+		}
+
 		return &models.UserInfo{
 			Roles:        []string{"admin"},
-			Introduction: "I am a super administrator",
+			Introduction: user.Remark,
 			Avatar:       "./assets/user.gif",
 			Name:         claims.Name,
 		}, nil
@@ -203,5 +227,141 @@ func (s AuthService) GetUserInfo(token string) (*models.UserInfo, error) {
 
 // Logout 退出登录
 func (s AuthService) Logout(token string) (string, error) {
+	return "success", nil
+}
+
+// AddRole 添加角色
+func (s AuthService) AddRole(role models.Role) (string, error) {
+	if !s.DB.HasTable(&models.Role{}) {
+		if err := s.DB.CreateTable(&models.Role{}).Error; err != nil {
+			return "", err
+		}
+	}
+	// 角色名称不能为空
+	if role.Name == "" {
+		return "", utils.ErrRoleNameIsNull
+	}
+
+	role0, _ := s.QueryRoleByName(role.Name)
+	if role0 != nil {
+		return "", utils.ErrRoleAlreadyExists
+	}
+
+	if err := s.DB.Create(&role).Error; err != nil {
+		return "", err
+	}
+	return "success", nil
+}
+
+// QueryRoleByName 查询角色
+func (s AuthService) QueryRoleByName(name string) (*models.Role, error) {
+	if !s.DB.HasTable(&models.Role{}) {
+		return nil, utils.ErrNotFound
+	}
+	var role models.Role
+	if err := s.DB.Where("name = ?", name).First(&role).Error; err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}
+
+// QueryRoleByID 查询角色
+func (s AuthService) QueryRoleByID(id uint) (*models.Role, error) {
+	if !s.DB.HasTable(&models.Role{}) {
+		return nil, utils.ErrNotFound
+	}
+	var role models.Role
+	if err := s.DB.Where("id = ?", id).First(&role).Error; err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}
+
+// UpdateRole 修改角色
+func (s AuthService) UpdateRole(role models.Role) (string, error) {
+	if !s.DB.HasTable(&models.Role{}) {
+		if err := s.DB.CreateTable(&models.Role{}).Error; err != nil {
+			return "", err
+		}
+	}
+	_, err0 := s.QueryRoleByID(role.ID)
+	if err0 != nil {
+		return "", utils.ErrRoleNotFound
+	}
+	if err := s.DB.Save(&role).Error; err != nil {
+		return "", err
+	}
+	return "success", nil
+}
+
+// DeleteRole 删除角色
+func (s AuthService) DeleteRole(id uint) (string, error) {
+	if err := s.DB.Where("id = ?", id).Delete(&models.Role{}).Error; err != nil {
+		return "", nil
+	}
+	return "success", nil
+}
+
+// ListRoles 获取角色列表
+func (s AuthService) ListRoles(name string, pageIndex int, pageSize int) (*models.SearchResult, error) {
+	if !s.DB.HasTable(&models.Role{}) {
+		return nil, utils.ErrNotFound
+	}
+	roledb := s.DB.Model(&models.Role{})
+	if name != "" {
+		roledb = s.DB.Model(&models.Role{}).Where("name LIKE ?", "%"+name+"%")
+	}
+	if pageIndex == 0 {
+		pageIndex = 1
+	}
+	if pageSize == 0 {
+		pageSize = 10
+	}
+	var rowCount int
+	roledb.Count(&rowCount)                                            //总行数
+	pageCount := int(math.Ceil(float64(rowCount) / float64(pageSize))) // 总页数
+
+	var roles []models.Role
+	if err := roledb.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&roles).Error; err != nil {
+		return nil, err
+	}
+
+	return &models.SearchResult{Total: rowCount, PageIndex: pageIndex, PageSize: pageSize, PageCount: pageCount, List: &roles}, nil
+}
+
+// SetUserRole 设置用户角色
+func (s AuthService) SetUserRole(userID uint, roleIDs []uint) (string, error) {
+	// 检查表是否存在
+	if !s.DB.HasTable(&models.UserRoleRelation{}) {
+		if err := s.DB.CreateTable(&models.UserRoleRelation{}).Error; err != nil {
+			return "", err
+		}
+	}
+	// 事务
+	tx := s.DB.Begin()
+	// 先删除旧数据
+	if err := tx.Where("user_id = ?", userID).Delete(&models.UserRoleRelation{}).Error; err != nil {
+		return "", nil
+	}
+	// 增加新关系
+	for _, value := range roleIDs {
+		if err := tx.Create(&models.UserRoleRelation{UserID: userID, RoleID: value}).Error; err != nil {
+			tx.Rollback()
+			return "", err
+		}
+	}
+	tx.Commit()
+	return "success", nil
+}
+
+// SetRoleFuncs 设置角色权限
+func (s AuthService) SetRoleFuncs(roleID uint, funcs []uint) (string, error) {
+	return "success", nil
+}
+
+// GetRoleFuncs 获取角色权限
+func (s AuthService) GetRoleFuncs(roleID uint) (string, error) {
 	return "success", nil
 }
