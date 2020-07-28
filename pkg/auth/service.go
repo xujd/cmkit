@@ -41,9 +41,9 @@ type Service interface {
 	// 设置用户角色
 	SetUserRole(userID uint, roleIDs []uint) (string, error)
 	// 设置角色权限
-	SetRoleFuncs(roleID uint, funcs []uint) (string, error)
+	SetRoleFuncs(roleFunc models.RoleFunc) (string, error)
 	// 获取角色权限
-	GetRoleFuncs(roleID uint) (string, error)
+	GetRoleFuncs(roleID uint) (*models.RoleFunc, error)
 }
 
 // AuthService 权限服务
@@ -210,17 +210,22 @@ func (s AuthService) GetUserInfo(token string) (*models.UserInfo, error) {
 			return nil, utils.ErrUserNotFound
 		}
 
-		var userRoles models.UserRoleRelation
-		if err : = s.DB.Where("user_id = ?", user.ID).Find(&userRoles).Error; err != nil {
-			return nil, err
-		}
-
-		return &models.UserInfo{
-			Roles:        []string{"admin"},
+		userInfo := &models.UserInfo{
 			Introduction: user.Remark,
 			Avatar:       "./assets/user.gif",
-			Name:         claims.Name,
-		}, nil
+			Name:         user.Name,
+			ID:           user.ID,
+		}
+
+		var roles []models.Role
+		s.DB.Raw("SELECT * FROM t_auth_role WHERE id IN (SELECT role_id FROM r_auth_user_role WHERE user_id=?)", user.ID).Scan(&roles)
+
+		userInfo.Roles = make([]string, len(roles))
+		for key, value := range roles {
+			userInfo.Roles[key] = value.Name
+		}
+
+		return userInfo, nil
 	}
 	return nil, utils.ErrBadQueryParams
 }
@@ -357,11 +362,38 @@ func (s AuthService) SetUserRole(userID uint, roleIDs []uint) (string, error) {
 }
 
 // SetRoleFuncs 设置角色权限
-func (s AuthService) SetRoleFuncs(roleID uint, funcs []uint) (string, error) {
+func (s AuthService) SetRoleFuncs(roleFunc models.RoleFunc) (string, error) {
+	// 检查表是否存在
+	if !s.DB.HasTable(&models.RoleFunc{}) {
+		if err := s.DB.CreateTable(&models.RoleFunc{}).Error; err != nil {
+			return "", err
+		}
+	}
+	// 事务
+	tx := s.DB.Begin()
+	// 先删除旧数据
+	if err := tx.Where("role_id = ?", roleFunc.ID).Delete(&models.RoleFunc{}).Error; err != nil {
+		return "", nil
+	}
+	// 增加新关系
+	if err := tx.Create(&roleFunc).Error; err != nil {
+		tx.Rollback()
+		return "", err
+	}
+	tx.Commit()
 	return "success", nil
 }
 
 // GetRoleFuncs 获取角色权限
-func (s AuthService) GetRoleFuncs(roleID uint) (string, error) {
-	return "success", nil
+func (s AuthService) GetRoleFuncs(roleID uint) (*models.RoleFunc, error) {
+	// 检查表是否存在
+	if !s.DB.HasTable(&models.RoleFunc{}) {
+		return nil, utils.ErrNotFound
+	}
+	var roleFunc models.RoleFunc
+	if err := s.DB.Where("role_id = ?", roleID).First(&roleFunc).Error; err != nil {
+		return nil, err
+	}
+
+	return &roleFunc, nil
 }

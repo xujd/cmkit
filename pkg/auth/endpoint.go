@@ -25,6 +25,8 @@ type AuthEndpoints struct {
 	DeleteRoleEndpoint    endpoint.Endpoint
 	ListRolesEndpoint     endpoint.Endpoint
 	SetUserRoleEndpoint   endpoint.Endpoint
+	SetRoleFuncsEndpoint  endpoint.Endpoint
+	GetRoleFuncsEndpoint  endpoint.Endpoint
 }
 
 // AuthRequest 登录请求
@@ -70,6 +72,10 @@ func CreateEndpoints(svc Service) AuthEndpoints {
 
 	setUserRoleEndpoint := MakeSetUserRoleEndpoint(svc)
 	setUserRoleEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(setUserRoleEndpoint)
+	setRoleFuncsEndpoint := MakeSetRoleFuncsEndpoint(svc)
+	setRoleFuncsEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(setRoleFuncsEndpoint)
+	getRoleFuncsEndpoint := MakeGetRoleFuncsEndpoint(svc)
+	getRoleFuncsEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(getRoleFuncsEndpoint)
 
 	authEndpoints := AuthEndpoints{
 		LoginEndpoint:         loginEndpoint,
@@ -86,6 +92,8 @@ func CreateEndpoints(svc Service) AuthEndpoints {
 		DeleteRoleEndpoint:    deleteRoleEndpoint,
 		ListRolesEndpoint:     listRolesEndpoint,
 		SetUserRoleEndpoint:   setUserRoleEndpoint,
+		SetRoleFuncsEndpoint:  setRoleFuncsEndpoint,
+		GetRoleFuncsEndpoint:  getRoleFuncsEndpoint,
 	}
 
 	return authEndpoints
@@ -295,6 +303,34 @@ func MakeSetUserRoleEndpoint(svc Service) endpoint.Endpoint {
 			roleIds[i] = uint(value.(float64))
 		}
 		result, err := svc.SetUserRole(uint(req["userId"].(float64)), roleIds)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeSetRoleFuncsEndpoint 设置角色权限
+func MakeSetRoleFuncsEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.RoleFunc)
+		result, err := svc.SetRoleFuncs(req)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeGetRoleFuncsEndpoint 查询角色权限
+func MakeGetRoleFuncsEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.BaseModel)
+		result, err := svc.GetRoleFuncs(req.ID)
 
 		if err != nil {
 			return nil, err

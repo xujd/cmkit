@@ -22,6 +22,7 @@ type UserInfo struct {
 	Introduction string   `json:"introduction"`
 	Avatar       string   `json:"avatar"`
 	Name         string   `json:"name"`
+	ID           uint     `json:"id"`
 }
 
 // UserRoleRelation 用户角色关系

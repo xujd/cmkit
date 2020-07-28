@@ -12,3 +12,15 @@ type Role struct {
 func (Role) TableName() string {
 	return "t_auth_role"
 }
+
+// RoleFunc 角色权限
+type RoleFunc struct {
+	ID     uint   `json:"id" gorm:"primary_key"`
+	RoleID uint   `json:"roleId"`
+	Funcs  string `json:"funcs"`
+}
+
+// TableName 角色权限关系表
+func (RoleFunc) TableName() string {
+	return "r_auth_role_func"
+}

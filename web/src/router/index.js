@@ -105,6 +105,163 @@ export const constantRoutes = [
  */
 export const asyncRoutes = [
   {
+    path: '/res',
+    component: Layout,
+    redirect: '/res/sling',
+    alwaysShow: true, // will always show the root menu
+    name: 'Res',
+    meta: {
+      title: '资产管理',
+      icon: 'el-icon-s-help',
+      roles: ['admin', 'editor']
+    },
+    children: [
+      {
+        path: 'sling',
+        component: () => import('@/views/res/sling'),
+        name: 'Sling',
+        meta: {
+          title: '吊索具',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'smart-cabinet',
+        component: () => import('@/views/res/smart-cabinet'),
+        name: 'SmartCabinet',
+        meta: {
+          title: '智能柜',
+          roles: ['admin']
+        }
+      }
+    ]
+  },
+  {
+    path: '/apply',
+    component: Layout,
+    redirect: '/apply/borrow',
+    alwaysShow: true,
+    name: 'Apply',
+    meta: {
+      title: '使用管理',
+      icon: 'el-icon-s-promotion',
+      roles: ['admin', 'editor']
+    },
+    children: [
+      {
+        path: 'borrow',
+        component: () => import('@/views/apply/borrow'),
+        name: 'Borrow',
+        meta: {
+          title: '借用',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'return',
+        component: () => import('@/views/apply/return'),
+        name: 'Return',
+        meta: {
+          title: '归还',
+          roles: ['admin']
+        }
+      }
+    ]
+  },
+  {
+    path: '/maintain',
+    component: Layout,
+    redirect: '/maintain/inspection',
+    alwaysShow: true,
+    name: 'Maintain',
+    meta: {
+      title: '维护管理',
+      icon: 'el-icon-s-claim',
+      roles: ['admin', 'editor']
+    },
+    children: [
+      {
+        path: 'inspection',
+        component: () => import('@/views/maintain/inspection'),
+        name: 'Inspection',
+        meta: {
+          title: '巡检',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'flaw-detection',
+        component: () => import('@/views/maintain/flaw-detection'),
+        name: 'FlawDetection',
+        meta: {
+          title: '探伤',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'inspection-rule',
+        component: () => import('@/views/maintain/inspection-rule'),
+        name: 'InspectionRule',
+        meta: {
+          title: '巡检规则',
+          roles: ['admin']
+        }
+      }
+    ]
+  },
+  {
+    path: '/auth',
+    component: Layout,
+    redirect: '/auth/user',
+    alwaysShow: true,
+    name: 'Auth',
+    meta: {
+      title: '系统管理',
+      icon: 'lock',
+      roles: ['admin', 'editor']
+    },
+    children: [
+      {
+        path: 'user',
+        component: () => import('@/views/auth/user'),
+        name: 'User',
+        meta: {
+          title: '帐号管理',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'role',
+        component: () => import('@/views/auth/role'),
+        name: 'Role',
+        meta: {
+          title: '角色管理'
+          // if do not set roles, means: this page does not require permission
+        }
+      },
+      {
+        path: 'staff',
+        component: () => import('@/views/auth/staff'),
+        name: 'Staff',
+        meta: {
+          title: '员工管理',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'group',
+        component: () => import('@/views/auth/group'),
+        name: 'GRoup',
+        meta: {
+          title: '分组管理',
+          roles: ['admin']
+        }
+      }
+    ]
+  }
+]
+export const asyncRoutes111 = [
+  {
     path: '/permission',
     component: Layout,
     redirect: '/permission/page',

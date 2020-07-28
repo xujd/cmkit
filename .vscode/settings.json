@@ -1,0 +1,6 @@
+{
+    "vetur.format.defaultFormatter.js": "vscode-typescript",
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true
+    }
+}

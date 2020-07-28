@@ -66,7 +66,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 删除用户
 	deleteUserHandler := kithttp.NewServer(
 		endpoints.DeleteUserEndpoint,
-		decodeUserIDRequest,
+		decodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -76,7 +76,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 查询用户
 	queryUserByIDHandler := kithttp.NewServer(
 		endpoints.QueryUserByIDEndpoint,
-		decodeUserIDRequest,
+		decodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -133,7 +133,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 删除角色
 	deleteRoleHandler := kithttp.NewServer(
 		endpoints.DeleteRoleEndpoint,
-		decodeUserIDRequest,
+		decodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -159,6 +159,26 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	)
 
 	r.Handle("/auth/userrole", setUserRoleHandler).Methods("POST")
+
+	// 设置角色权限
+	setRoleFuncsHandler := kithttp.NewServer(
+		endpoints.SetRoleFuncsEndpoint,
+		decodeRoleFuncRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/rolefunc", setRoleFuncsHandler).Methods("POST")
+
+	// 查询角色权限
+	getRoleFuncsHandler := kithttp.NewServer(
+		endpoints.GetRoleFuncsEndpoint,
+		decodeDataIDRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/auth/rolefunc/{id}", getRoleFuncsHandler).Methods("GET")
 
 	return r
 }
@@ -194,7 +214,7 @@ func decodeUpdateUserRequest(_ context.Context, r *http.Request) (interface{}, e
 	return user, nil
 }
 
-func decodeUserIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeDataIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
@@ -243,4 +263,12 @@ func decodeUserRoleRequest(_ context.Context, r *http.Request) (interface{}, err
 		return nil, err
 	}
 	return data, nil
+}
+
+func decodeRoleFuncRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var roleFunc models.RoleFunc
+	if err := json.NewDecoder(r.Body).Decode(&roleFunc); err != nil {
+		return nil, err
+	}
+	return roleFunc, nil
 }
