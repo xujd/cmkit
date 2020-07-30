@@ -11,8 +11,8 @@ var (
 	ErrUserNotFound = errors.New("用户不存在")
 	// ErrNameOrPasswordIsNull 用户名或密码为空
 	ErrNameOrPasswordIsNull = errors.New("用户名或密码为空")
-	// ErrNotFound 未找到
-	ErrNotFound = errors.New("未找到")
+	// ErrNotFound 未找到数据表或相关记录
+	ErrNotFound = errors.New("未找到数据表或相关记录")
 	// ErrUserPwdDismatch 用户名或密码错误
 	ErrUserPwdDismatch = errors.New("用户名或密码错误")
 	// ErrUserStatus 用户状态异常
@@ -25,4 +25,8 @@ var (
 	ErrRoleAlreadyExists = errors.New("角色已存在")
 	// ErrRoleNotFound 角色不存在
 	ErrRoleNotFound = errors.New("角色不存在")
+	// ErrStaffNameIsNull 员工姓名不能为空
+	ErrStaffNameIsNull = errors.New("员工姓名不能为空")
+	// ErrStaddIDAlreadyExists 员工编号已存在
+	ErrStaddIDAlreadyExists = errors.New("员工编号已存在")
 )

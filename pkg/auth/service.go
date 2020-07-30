@@ -134,7 +134,12 @@ func (s AuthService) QueryUserByID(id uint) (*models.User, error) {
 		return nil, utils.ErrNotFound
 	}
 	var user models.User
-	if err := s.DB.Select("id,created_at,updated_at,deleted_at,name,start_time,end_time,status,remark").Where("id = ?", id).First(&user).Error; err != nil {
+	selectStr := "t_auth_user.id,t_auth_user.created_at,t_auth_user.updated_at,t_auth_user.deleted_at,t_auth_user.name,t_auth_user.start_time,t_auth_user.end_time,t_auth_user.status,t_auth_user.remark,t_auth_user.staff_id, t_sys_staff.name AS staff_name"
+
+	if err := s.DB.Table("t_auth_user").Select(selectStr).
+		Joins("JOIN t_sys_staff ON t_auth_user.staff_id = t_sys_staff.id").
+		Where("t_auth_user.deleted_at IS NULL AND t_auth_user.id = ?", id).
+		First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -146,9 +151,13 @@ func (s AuthService) ListUsers(name string, pageIndex int, pageSize int) (*model
 	if !s.DB.HasTable(&models.User{}) {
 		return nil, utils.ErrNotFound
 	}
-	userdb := s.DB.Model(&models.User{})
+	selectStr := "t_auth_user.id,t_auth_user.created_at,t_auth_user.updated_at,t_auth_user.deleted_at,t_auth_user.name,t_auth_user.start_time,t_auth_user.end_time,t_auth_user.status,t_auth_user.remark,t_auth_user.staff_id, t_sys_staff.name AS staff_name"
+	userdb := s.DB.Table("t_auth_user").Select(selectStr).
+		Joins("JOIN t_sys_staff ON t_auth_user.staff_id = t_sys_staff.id").
+		Where("t_auth_user.deleted_at IS NULL")
+
 	if name != "" {
-		userdb = s.DB.Model(&models.User{}).Where("name LIKE ?", "%"+name+"%")
+		userdb = userdb.Where("t_auth_user.name LIKE ?", "%"+name+"%")
 	}
 	if pageIndex == 0 {
 		pageIndex = 1
@@ -161,7 +170,7 @@ func (s AuthService) ListUsers(name string, pageIndex int, pageSize int) (*model
 	pageCount := int(math.Ceil(float64(rowCount) / float64(pageSize))) // 总页数
 
 	var users []models.User
-	if err := userdb.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Select("id,created_at,updated_at,deleted_at,name,start_time,end_time,status,remark").Find(&users).Error; err != nil {
+	if err := userdb.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&users).Error; err != nil {
 		return nil, err
 	}
 

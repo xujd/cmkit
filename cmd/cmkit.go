@@ -18,6 +18,7 @@ import (
 
 	"cmkit/pkg/auth"
 	"cmkit/pkg/hello"
+	"cmkit/pkg/sys"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -78,6 +79,7 @@ func main() {
 	}, fieldKeys)
 
 	// service
+	// 权限
 	var authSvc auth.Service
 	authSvc = auth.AuthService{
 		DB: db,
@@ -87,6 +89,17 @@ func main() {
 	authSvc = auth.NewInstrumentingMiddleware(requestCount, requestLatency, authSvc)
 	authEndpoints := auth.CreateEndpoints(authSvc)
 
+	// 系统基础
+	var sysSvc sys.Service
+	sysSvc = sys.SysService{
+		DB: db,
+	}
+
+	sysSvc = sys.NewLoggingMiddleware(log.With(logger, "component", "sys"), sysSvc)
+	sysSvc = sys.NewInstrumentingMiddleware(requestCount, requestLatency, sysSvc)
+	sysEndpoints := sys.CreateEndpoints(sysSvc)
+
+	// 测试
 	var helloSvc hello.Service
 	helloSvc = hello.HelloService{}
 
@@ -101,6 +114,7 @@ func main() {
 
 	mux.Handle("/auth/", auth.MakeHandler(authEndpoints, httpLogger))
 	mux.Handle("/hello/", hello.MakeHandler(helloEndpoint, httpLogger))
+	mux.Handle("/sys/", sys.MakeHandler(sysEndpoints, httpLogger))
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 

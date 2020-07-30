@@ -9,6 +9,8 @@ type User struct {
 	EndTime   *JSONTime `json:"endTime" gorm:"type:timestamp"`
 	Status    int16     `json:"status"` // 0-正常，1-锁定，2-删除
 	Remark    string    `json:"remark"`
+	StaffName string    `json:"staffName"`
+	StaffID   uint      `json:"staffId"`
 }
 
 // TableName user表

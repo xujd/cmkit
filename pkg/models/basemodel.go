@@ -62,9 +62,9 @@ type BaseModel struct {
 
 // SearchResult 查询结果列表
 type SearchResult struct {
-	Total     int         `json:total`
-	PageIndex int         `json:pageIndex`
-	PageSize  int         `json:pageSize`
-	PageCount int         `json:pageCount`
-	List      interface{} `json:list`
+	Total     int         `json:"total"`
+	PageIndex int         `json:"pageIndex"`
+	PageSize  int         `json:"pageSize"`
+	PageCount int         `json:"pageCount"`
+	List      interface{} `json:"list"`
 }
