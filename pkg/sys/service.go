@@ -110,8 +110,12 @@ func (s SysService) AddStaff(staff models.Staff) (string, error) {
 	return "success", nil
 }
 
-// UpdateStaff 修改用户
+// UpdateStaff 修改员工
 func (s SysService) UpdateStaff(staff models.Staff) (string, error) {
+	// 默认员工不准修改
+	if staff.ID == 1 {
+		return "", utils.ErrNoUpdate
+	}
 	if !s.DB.HasTable(&models.Staff{}) {
 		if err := s.DB.CreateTable(&models.Staff{}).Error; err != nil {
 			return "", err
@@ -125,6 +129,10 @@ func (s SysService) UpdateStaff(staff models.Staff) (string, error) {
 
 // DeleteStaff 删除员工
 func (s SysService) DeleteStaff(id uint) (string, error) {
+	// 默认员工不准删除
+	if id == 1 {
+		return "", utils.ErrNoDelete
+	}
 	if err := s.DB.Where("id = ?", id).Delete(&models.Staff{}).Error; err != nil {
 		return "", nil
 	}

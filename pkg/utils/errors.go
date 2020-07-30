@@ -29,4 +29,8 @@ var (
 	ErrStaffNameIsNull = errors.New("员工姓名不能为空")
 	// ErrStaddIDAlreadyExists 员工编号已存在
 	ErrStaddIDAlreadyExists = errors.New("员工编号已存在")
+	// ErrNoDelete 数据不允许删除
+	ErrNoDelete = errors.New("数据不允许删除")
+	// ErrNoUpdate 数据不允许修改
+	ErrNoUpdate = errors.New("数据不允许修改")
 )

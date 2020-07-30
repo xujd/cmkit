@@ -77,6 +77,10 @@ func (s AuthService) AddUser(user models.User) (string, error) {
 
 // UpdateUser 修改用户
 func (s AuthService) UpdateUser(user models.User) (string, error) {
+	// 默认用户不准修改
+	if user.ID == 1 {
+		return "", utils.ErrNoUpdate
+	}
 	if !s.DB.HasTable(&models.User{}) {
 		if err := s.DB.CreateTable(&models.User{}).Error; err != nil {
 			return "", err
@@ -109,6 +113,10 @@ func (s AuthService) UpdateUser(user models.User) (string, error) {
 
 // DeleteUser 删除用户
 func (s AuthService) DeleteUser(id uint) (string, error) {
+	// 根用户不准删除
+	if id == 1 {
+		return "", utils.ErrNoDelete
+	}
 	if err := s.DB.Where("id = ?", id).Delete(&models.User{}).Error; err != nil {
 		return "", nil
 	}
@@ -295,6 +303,10 @@ func (s AuthService) QueryRoleByID(id uint) (*models.Role, error) {
 
 // UpdateRole 修改角色
 func (s AuthService) UpdateRole(role models.Role) (string, error) {
+	// 默认角色不准修改
+	if user.ID == 1 {
+		return "", utils.ErrNoUpdate
+	}
 	if !s.DB.HasTable(&models.Role{}) {
 		if err := s.DB.CreateTable(&models.Role{}).Error; err != nil {
 			return "", err
@@ -312,6 +324,10 @@ func (s AuthService) UpdateRole(role models.Role) (string, error) {
 
 // DeleteRole 删除角色
 func (s AuthService) DeleteRole(id uint) (string, error) {
+	// 根角色不准删除
+	if id == 1 {
+		return "", utils.ErrNoDelete
+	}
 	if err := s.DB.Where("id = ?", id).Delete(&models.Role{}).Error; err != nil {
 		return "", nil
 	}
