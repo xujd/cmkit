@@ -2,7 +2,10 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+import NProgress from 'nprogress' // progress bar
+import 'nprogress/nprogress.css' // progress bar style
 
+NProgress.configure({ showSpinner: false }) // NProgress Configuration
 // create an axios instance
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
@@ -14,7 +17,8 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-
+    // start progress bar
+    NProgress.start()
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
@@ -24,6 +28,7 @@ service.interceptors.request.use(
     return config
   },
   error => {
+    NProgress.done()
     // do something with request error
     console.log(error) // for debug
     return Promise.reject(error)
@@ -43,6 +48,7 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
+    NProgress.done()
     const res = response.data
 
     // if the custom code is not 20000, it is judged as an error.
@@ -72,6 +78,7 @@ service.interceptors.response.use(
     }
   },
   error => {
+    NProgress.done()
     console.log('err' + error) // for debug
     Message({
       message: error.message,

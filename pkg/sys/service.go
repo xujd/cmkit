@@ -21,7 +21,7 @@ type Service interface {
 	// 删除员工
 	DeleteStaff(id uint) (string, error)
 	// 查询员工列表
-	ListStaffs(name string, pageIndex int, pageSize int) (*models.SearchResult, error)
+	ListStaffs(name string, companyID uint, departmentID uint, pageIndex int, pageSize int) (*models.SearchResult, error)
 }
 
 // SysService 基础服务
@@ -153,7 +153,7 @@ func (s SysService) QueryStaffByID(id uint) (*models.Staff, error) {
 }
 
 // ListStaffs 查询员工
-func (s SysService) ListStaffs(name string, pageIndex int, pageSize int) (*models.SearchResult, error) {
+func (s SysService) ListStaffs(name string, companyID uint, departmentID uint, pageIndex int, pageSize int) (*models.SearchResult, error) {
 	if !s.DB.HasTable(&models.Staff{}) {
 		return nil, utils.ErrNotFound
 	}
@@ -165,6 +165,14 @@ func (s SysService) ListStaffs(name string, pageIndex int, pageSize int) (*model
 
 	if name != "" {
 		staffdb = staffdb.Where("t_sys_staff.name LIKE ?", "%"+name+"%")
+	}
+
+	if companyID > 0 {
+		staffdb = staffdb.Where("t_sys_staff.company_id = ?", companyID)
+	}
+
+	if departmentID > 0 {
+		staffdb = staffdb.Where("t_sys_staff.department_id = ?", departmentID)
 	}
 
 	if pageIndex == 0 {

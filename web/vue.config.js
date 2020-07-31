@@ -45,7 +45,13 @@ module.exports = {
       alias: {
         '@': resolve('src')
       }
-    }
+    },
+    plugins: [
+      // eslint-disable-next-line no-useless-escape
+      new webpack.ProvidePlugin({
+        _: 'lodash'
+      })
+    ]
   },
   chainWebpack(config) {
     // it can improve the speed of the first screen, it is recommended to turn on preload

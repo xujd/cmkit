@@ -124,7 +124,7 @@ func MakeDeleteStaffEndpoint(svc Service) endpoint.Endpoint {
 func MakeListStaffsEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(map[string]interface{})
-		result, err := svc.ListStaffs(req["name"].(string), req["pageIndex"].(int), req["pageSize"].(int))
+		result, err := svc.ListStaffs(req["name"].(string), uint(req["companyId"].(int)), uint(req["departmentId"].(int)), req["pageIndex"].(int), req["pageSize"].(int))
 
 		if err != nil {
 			return nil, err

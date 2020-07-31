@@ -4,9 +4,9 @@ package models
 type Staff struct {
 	BaseModel
 	Name           string    `json:"name" gorm:"size:64"`            // 员工姓名
-	CompanyName    string    `json:"companyName"`                    // 公司
+	CompanyName    string    `json:"companyName" gorm:"-"`           // 公司
 	CompanyID      uint      `json:"companyId"`                      // 公司ID
-	DepartmentName string    `json:"departmentName"`                 // 部门
+	DepartmentName string    `json:"departmentName" gorm:"-"`        // 部门
 	DepartmentID   uint      `json:"departmentId"`                   // 部门ID
 	PostName       string    `json:"postName"`                       // 职务
 	Birthday       *JSONTime `json:"birthday" gorm:"type:timestamp"` // 出生日期

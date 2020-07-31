@@ -77,7 +77,7 @@ func MakeHandler(endpoints SysEndpoints, logger kitlog.Logger) http.Handler {
 	// 查询员工列表
 	listStaffsHandler := kithttp.NewServer(
 		endpoints.ListStaffsEndpoint,
-		decodeListSearchRequest,
+		decodeStaffListSearchRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -125,6 +125,35 @@ func decodeDeptSearchRequest(_ context.Context, r *http.Request) (interface{}, e
 	}
 
 	return map[string]interface{}{"name": name, "companyId": companyID, "pageSize": pageSize, "pageIndex": pageIndex}, nil
+}
+
+func decodeStaffListSearchRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := r.URL.Query()
+	name := vars.Get("name")
+	size := vars.Get("pageSize")
+	index := vars.Get("pageIndex")
+	pageSize, err := strconv.Atoi(size)
+	if err != nil {
+		pageSize = 10
+	}
+	pageIndex, err2 := strconv.Atoi(index)
+	if err2 != nil {
+		pageIndex = 1
+	}
+
+	company := vars.Get("companyId")
+	companyID, err3 := strconv.Atoi(company)
+	if err3 != nil {
+		companyID = 0
+	}
+
+	department := vars.Get("departmentId")
+	departmentID, err4 := strconv.Atoi(department)
+	if err4 != nil {
+		departmentID = 0
+	}
+
+	return map[string]interface{}{"name": name, "companyId": companyID, "departmentId": departmentID, "pageSize": pageSize, "pageIndex": pageIndex}, nil
 }
 
 func decodeAddStaffRequest(_ context.Context, r *http.Request) (interface{}, error) {

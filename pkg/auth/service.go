@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 )
@@ -197,7 +198,7 @@ func (s AuthService) Login(name, pwd string) (string, error) {
 	}
 	password := fmt.Sprintf("%x", sha256.Sum256([]byte(pwd+name)))
 	if user.Name == name && user.Password == password {
-		token, err := Sign(name, pwd)
+		token, err := Sign(name, strconv.Itoa(int(user.ID)))
 		return token, err
 	}
 
@@ -221,8 +222,8 @@ func (s AuthService) GetUserInfo(token string) (*models.UserInfo, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		user, err := s.QueryUserByName(claims.Name)
+		id, _ := strconv.Atoi(claims.UserId)
+		user, err := s.QueryUserByID(uint(id))
 		if err != nil {
 			return nil, utils.ErrUserNotFound
 		}
@@ -232,6 +233,7 @@ func (s AuthService) GetUserInfo(token string) (*models.UserInfo, error) {
 			Avatar:       "./assets/user.gif",
 			Name:         user.Name,
 			ID:           user.ID,
+			StaffName:    user.StaffName,
 		}
 
 		var roles []models.Role
@@ -304,7 +306,7 @@ func (s AuthService) QueryRoleByID(id uint) (*models.Role, error) {
 // UpdateRole 修改角色
 func (s AuthService) UpdateRole(role models.Role) (string, error) {
 	// 默认角色不准修改
-	if user.ID == 1 {
+	if role.ID == 1 {
 		return "", utils.ErrNoUpdate
 	}
 	if !s.DB.HasTable(&models.Role{}) {

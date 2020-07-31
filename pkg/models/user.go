@@ -9,7 +9,7 @@ type User struct {
 	EndTime   *JSONTime `json:"endTime" gorm:"type:timestamp"`
 	Status    int16     `json:"status"` // 0-正常，1-锁定，2-删除
 	Remark    string    `json:"remark"`
-	StaffName string    `json:"staffName"`
+	StaffName string    `json:"staffName" gorm:"-"`
 	StaffID   uint      `json:"staffId"`
 }
 
@@ -25,6 +25,7 @@ type UserInfo struct {
 	Avatar       string   `json:"avatar"`
 	Name         string   `json:"name"`
 	ID           uint     `json:"id"`
+	StaffName    string   `json:"staffName"`
 }
 
 // UserRoleRelation 用户角色关系
