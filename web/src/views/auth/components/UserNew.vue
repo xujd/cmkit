@@ -49,6 +49,12 @@ export default {
         remark: '',
         status: 0
       },
+      rules: {
+        name: [
+          { required: true, message: '请输入账号名称', trigger: 'blur' },
+          { min: 2, max: 16, message: '长度在 2 到 16 个字符', trigger: 'blur' }
+        ]
+      },
       statusList: [
         { id: 0, name: '有效' },
         { id: 1, name: '无效' }

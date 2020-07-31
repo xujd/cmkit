@@ -33,7 +33,7 @@ var (
 func main() {
 	fmt.Printf("v%s\n%s\n%s\n", VERSION, BUILD_TIME, GO_VERSION)
 	var (
-		serviceHost = flag.String("service.host", "127.0.0.1", "service ip address")
+		serviceHost = flag.String("service.host", "", "service ip address")
 		servicePort = flag.String("service.port", "8089", "service port")
 		dbHost      = flag.String("db.host", "127.0.0.1", "db ip address")
 		dbPort      = flag.Int("db.port", 5432, "db port")
