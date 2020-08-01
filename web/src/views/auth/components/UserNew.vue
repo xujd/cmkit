@@ -1,27 +1,27 @@
 <template>
   <el-form :model="formData" :rules="rules" label-width="100px">
-    <el-form-item label="账号名称" prop="name" required>
+    <el-form-item label="用户名称" prop="name" required>
       <el-input v-model="formData.name" autocomplete="off" />
     </el-form-item>
-    <el-form-item label="使用员工">
-      <el-select v-model="formData.departmentId" clearable placeholder="请选择">
-        <el-option v-for="item in departments" :key="item.id" :label="item.name" :value="item.id" />
+    <el-form-item label="使用员工" prop="staffId" required>
+      <el-select v-model="formData.staffId" clearable placeholder="请选择" filterable>
+        <el-option v-for="item in staffList" :key="item.id" :label="item.label" :value="item.id" />
       </el-select>
     </el-form-item>
-    <el-form-item label="有效日期">
+    <el-form-item label="生效开始时间">
       <el-date-picker
-        v-model="formData.birthday"
-        :value-format="'yyyy-MM-dd'"
-        type="date"
-        placeholder="选择日期"
+        v-model="formData.startTime"
+        :value-format="'yyyy-MM-dd HH:mm:ss'"
+        type="datetime"
+        placeholder="选择时间"
       />
     </el-form-item>
-    <el-form-item label="失效日期">
+    <el-form-item label="生效结束时间">
       <el-date-picker
-        v-model="formData.birthday"
-        :value-format="'yyyy-MM-dd'"
-        type="date"
-        placeholder="选择日期"
+        v-model="formData.endTime"
+        :value-format="'yyyy-MM-dd HH:mm:ss'"
+        type="datetime"
+        placeholder="选择时间"
       />
     </el-form-item>
     <el-form-item label="状态">
@@ -35,6 +35,7 @@
   </el-form>
 </template>
 <script>
+import * as staffApi from '@/api/staff'
 export default {
   name: 'UserNew',
   props: {
@@ -46,15 +47,23 @@ export default {
     return {
       formData: {
         name: '',
+        staffId: null,
+        startTime: null,
+        endTime: null,
         remark: '',
         status: 0
       },
       rules: {
         name: [
-          { required: true, message: '请输入账号名称', trigger: 'blur' },
+          { required: true, message: '请输入用户名称', trigger: 'blur' },
           { min: 2, max: 16, message: '长度在 2 到 16 个字符', trigger: 'blur' }
+        ],
+        staffId: [
+          { required: true, message: '请选择一个员工', trigger: 'change' }
         ]
       },
+      loading: false,
+      staffList: [],
       statusList: [
         { id: 0, name: '有效' },
         { id: 1, name: '无效' }
@@ -63,16 +72,22 @@ export default {
   },
   watch: {
     user: {
-      handler: function(newVal, oldVal) {
+      handler: function (newVal, oldVal) {
         if (newVal) {
           this.formData = {
             name: newVal.name,
+            staffId: newVal.staffId,
+            startTime: newVal.startTime,
+            endTime: newVal.endTime,
             remark: newVal.remark,
             status: newVal.status
           }
         } else {
           this.formData = {
             name: '',
+            staffId: null,
+            startTime: null,
+            endTime: null,
             remark: '',
             status: 0
           }
@@ -82,11 +97,21 @@ export default {
     }
   },
   mounted() {
+    staffApi.queryStaffs({ name: "" }, 1000, 1).then(d => {
+      d.data.list.forEach(item => {
+        item.label = `${item.id}|${item.name}`
+      })
+      this.staffList = d.data.list
+      this.loading = false
+    })
   },
   methods: {
     resetData() {
       this.formData = {
         name: '',
+        staffId: null,
+        startTime: null,
+        endTime: null,
         remark: '',
         status: 0
       }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -59,9 +60,15 @@ func (s AuthService) AddUser(user models.User) (string, error) {
 			return "", err
 		}
 	}
-	// 用户名和密码不能为空
-	if user.Name == "" || user.Password == "" {
-		return "", utils.ErrNameOrPasswordIsNull
+	// 默认密码
+	user.Password = fmt.Sprintf("%x", sha256.Sum256([]byte("123456a?"+user.Name)))
+	// 用户名不能为空
+	if user.Name == "" {
+		return "", utils.ErrUserNameIsNull
+	}
+	// 员工未指定
+	if user.StaffID == 0 {
+		return "", utils.ErrUserStaffIsNull
 	}
 
 	user0, _ := s.QueryUserByName(user.Name)
@@ -195,6 +202,24 @@ func (s AuthService) Login(name, pwd string) (string, error) {
 	// 用户状态异常
 	if user.Status != 0 {
 		return "", utils.ErrUserStatus
+	}
+
+	timeFormatStr = "2006-01-02 15:04:05"
+	// 开始生效时间
+	if user.StartTime != nil {
+		startTime := (*time.Time)(user.StartTime).Format(timeFormatStr)
+		t1, _ := time.ParseInLocation(timeFormatStr, string(startTime), time.Local)
+		if t1.After(time.Now()) {
+			return "", utils.ErrUserNotEffective
+		}
+	}
+	// 结束生效时间
+	if user.EndTime != nil {
+		endTime := (*time.Time)(user.EndTime).Format(timeFormatStr)
+		t2, _ := time.ParseInLocation(timeFormatStr, string(endTime), time.Local)
+		if t2.Before(time.Now()) {
+			return "", utils.ErrUserExpired
+		}
 	}
 	password := fmt.Sprintf("%x", sha256.Sum256([]byte(pwd+name)))
 	if user.Name == name && user.Password == password {

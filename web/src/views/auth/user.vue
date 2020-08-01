@@ -3,8 +3,8 @@
     <el-card class="search-box">
       <div style="position:relative;">
         <el-form :inline="true" :model="formData">
-          <el-form-item label="账号名称">
-            <el-input v-model="formData.name" clearable placeholder="账号名称" />
+          <el-form-item label="用户名称">
+            <el-input v-model="formData.name" clearable placeholder="用户名称" />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="onSubmit">查询</el-button>
@@ -16,10 +16,10 @@
     <el-card class="result-box">
       <el-table height="300" :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="编号" />
-        <el-table-column prop="name" label="账号名称" />
+        <el-table-column prop="name" label="用户名称" />
         <el-table-column prop="staffName" label="员工姓名" />
-        <el-table-column prop="startTimeStr" label="生效日期" />
-        <el-table-column prop="endTimeStr" label="失效日期" />
+        <el-table-column prop="startTimeStr" label="生效开始时间" />
+        <el-table-column prop="endTimeStr" label="生效结束时间" />
         <el-table-column prop="statusStr" label="状态" />
         <el-table-column prop="remark" label="备注" />
         <el-table-column fixed="right" label="操作" width="100">
@@ -62,7 +62,7 @@
 import * as userApi from '@/api/user'
 import { MessageBox, Message } from 'element-ui'
 import UserNew from './components/UserNew'
-
+import dayjs from 'dayjs'
 export default {
   name: 'User',
   components: {
@@ -70,7 +70,7 @@ export default {
   },
   data() {
     return {
-      userNewTitle: '添加账号',
+      userNewTitle: '添加用户',
       isAddUserVisible: false,
       curUser: null,
       formData: {
@@ -93,7 +93,7 @@ export default {
     },
     onAddNew() {
       this.curUser = null
-      this.userNewTitle = '添加账号'
+      this.userNewTitle = '添加用户'
       this.isAddUserVisible = true
     },
     onAddUserOK() {
@@ -128,11 +128,11 @@ export default {
     },
     handleEditClick(data) {
       this.curUser = data
-      this.userNewTitle = '修改账号'
+      this.userNewTitle = '修改用户'
       this.isAddUserVisible = true
     },
     handleDeleteClick(data) {
-      MessageBox.confirm('确认删除该账号？', '删除', {
+      MessageBox.confirm('确认删除该用户？', '删除', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
@@ -158,6 +158,10 @@ export default {
           item.statusStr = item.status === 0 ? '有效' : '无效'
           item.startTimeStr = item.startTime || '-'
           item.endTimeStr = item.endTime || '-'
+          // 已失效
+          if (item.endTime && item.status === 0 && dayjs(item.endTime).isBefore(dayjs())) {
+            item.statusStr = '已过期'
+          }
         })
         this.tableData = d.data.list
         this.dataTotal = d.data.total

@@ -226,7 +226,7 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/user'),
         name: 'User',
         meta: {
-          title: '帐号管理',
+          title: '用户管理',
           roles: ['admin']
         }
       },

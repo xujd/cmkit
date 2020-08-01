@@ -11,6 +11,14 @@ var (
 	ErrUserNotFound = errors.New("用户不存在")
 	// ErrNameOrPasswordIsNull 用户名或密码为空
 	ErrNameOrPasswordIsNull = errors.New("用户名或密码为空")
+	// ErrUserNotEffective 用户还未生效
+	ErrUserNotEffective = errors.New("用户还未生效")
+	// ErrUserExpired 用户已失效
+	ErrUserExpired = errors.New("用户已失效")
+	// ErrUserStaffIsNull 用户员工未选择
+	ErrUserStaffIsNull = errors.New("用户员工未选择")
+	// ErrUserNameIsNull 用户名为空
+	ErrUserNameIsNull = errors.New("用户名为空")
 	// ErrNotFound 未找到数据表或相关记录
 	ErrNotFound = errors.New("未找到数据表或相关记录")
 	// ErrUserPwdDismatch 用户名或密码错误
