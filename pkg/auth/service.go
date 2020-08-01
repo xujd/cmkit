@@ -204,7 +204,7 @@ func (s AuthService) Login(name, pwd string) (string, error) {
 		return "", utils.ErrUserStatus
 	}
 
-	timeFormatStr = "2006-01-02 15:04:05"
+	timeFormatStr := "2006-01-02 15:04:05"
 	// 开始生效时间
 	if user.StartTime != nil {
 		startTime := (*time.Time)(user.StartTime).Format(timeFormatStr)
