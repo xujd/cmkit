@@ -5,6 +5,7 @@ import Cookies from 'js-cookie'
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 
 import Element from 'element-ui'
+import { MessageBox, Message } from 'element-ui'
 import './styles/element-variables.scss'
 
 import '@/styles/index.scss' // global css
@@ -44,6 +45,9 @@ Object.keys(filters).forEach(key => {
 })
 
 Vue.config.productionTip = false
+
+Vue.prototype.$confirm = MessageBox.confirm
+Vue.prototype.$message = Message
 
 new Vue({
   el: '#app',

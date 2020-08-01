@@ -1,6 +1,6 @@
 <template>
   <el-form :model="formData" :rules="rules" label-width="100px">
-    <el-form-item label="用户名称" prop="name" required>
+    <el-form-item label="用户名" prop="name" required>
       <el-input v-model="formData.name" autocomplete="off" />
     </el-form-item>
     <el-form-item label="使用员工" prop="staffId" required>
@@ -55,14 +55,13 @@ export default {
       },
       rules: {
         name: [
-          { required: true, message: '请输入用户名称', trigger: 'blur' },
+          { required: true, message: '请输入用户名', trigger: 'blur' },
           { min: 2, max: 16, message: '长度在 2 到 16 个字符', trigger: 'blur' }
         ],
         staffId: [
           { required: true, message: '请选择一个员工', trigger: 'change' }
         ]
       },
-      loading: false,
       staffList: [],
       statusList: [
         { id: 0, name: '有效' },
@@ -72,7 +71,7 @@ export default {
   },
   watch: {
     user: {
-      handler: function (newVal, oldVal) {
+      handler: function(newVal, oldVal) {
         if (newVal) {
           this.formData = {
             name: newVal.name,
@@ -97,12 +96,11 @@ export default {
     }
   },
   mounted() {
-    staffApi.queryStaffs({ name: "" }, 1000, 1).then(d => {
+    staffApi.queryStaffs({ name: '' }, 1000, 1).then(d => {
       d.data.list.forEach(item => {
         item.label = `${item.id}|${item.name}`
       })
       this.staffList = d.data.list
-      this.loading = false
     })
   },
   methods: {

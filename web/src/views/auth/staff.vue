@@ -86,7 +86,6 @@
 <script>
 import * as staffApi from '@/api/staff'
 import * as sysApi from '@/api/sys'
-import { MessageBox, Message } from 'element-ui'
 import StaffNew from './components/StaffNew'
 
 export default {
@@ -141,7 +140,7 @@ export default {
       const data = this.$refs.staffNew.getData()
       if (!data.id) {
         staffApi.addStaff(data).then(d => {
-          Message({
+          this.$message({
             message: '添加成功',
             type: 'success'
           })
@@ -150,7 +149,7 @@ export default {
         })
       } else {
         staffApi.updateStaff(data).then(d => {
-          Message({
+          this.$message({
             message: '修改成功',
             type: 'success'
           })
@@ -173,14 +172,14 @@ export default {
       this.isAddStaffVisible = true
     },
     handleDeleteClick(data) {
-      MessageBox.confirm('确认删除该员工？', '删除', {
+      this.$confirm('确认删除该员工？', '删除', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         staffApi.deleteStaff(data.id).then(d => {
           if (d.code === 20000) {
-            Message({
+            this.$message({
               message: '删除成功',
               type: 'success'
             })

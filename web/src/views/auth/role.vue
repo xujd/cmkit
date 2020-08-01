@@ -57,7 +57,6 @@
 </template>
 <script>
 import * as roleApi from '@/api/role'
-import { MessageBox, Message } from 'element-ui'
 import RoleNew from './components/RoleNew'
 
 export default {
@@ -97,7 +96,7 @@ export default {
       const data = this.$refs.roleNew.getData()
       if (!data.id) {
         roleApi.addRole(data).then(d => {
-          Message({
+          this.$message({
             message: '添加成功',
             type: 'success'
           })
@@ -106,7 +105,7 @@ export default {
         })
       } else {
         roleApi.updateRole(data).then(d => {
-          Message({
+          this.$message({
             message: '修改成功',
             type: 'success'
           })
@@ -129,14 +128,14 @@ export default {
       this.isAddRoleVisible = true
     },
     handleDeleteClick(data) {
-      MessageBox.confirm('确认删除该角色？', '删除', {
+      this.$confirm('确认删除该角色？', '删除', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         roleApi.deleteRole(data.id).then(d => {
           if (d.code === 20000) {
-            Message({
+            this.$message({
               message: '删除成功',
               type: 'success'
             })

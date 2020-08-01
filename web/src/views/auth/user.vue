@@ -3,8 +3,8 @@
     <el-card class="search-box">
       <div style="position:relative;">
         <el-form :inline="true" :model="formData">
-          <el-form-item label="用户名称">
-            <el-input v-model="formData.name" clearable placeholder="用户名称" />
+          <el-form-item label="用户名">
+            <el-input v-model="formData.name" clearable placeholder="用户名" />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="onSubmit">查询</el-button>
@@ -15,14 +15,14 @@
     </el-card>
     <el-card class="result-box">
       <el-table height="300" :data="tableData" style="width: 100%">
-        <el-table-column prop="id" label="编号" />
-        <el-table-column prop="name" label="用户名称" />
-        <el-table-column prop="staffName" label="员工姓名" />
-        <el-table-column prop="startTimeStr" label="生效开始时间" />
-        <el-table-column prop="endTimeStr" label="生效结束时间" />
-        <el-table-column prop="statusStr" label="状态" />
-        <el-table-column prop="remark" label="备注" />
-        <el-table-column fixed="right" label="操作" width="100">
+        <el-table-column prop="id" width="80" label="编号" />
+        <el-table-column prop="name" width="120" label="用户名" />
+        <el-table-column prop="staffName" width="120" label="员工姓名" />
+        <el-table-column prop="startTimeStr" width="180" label="生效开始时间" />
+        <el-table-column prop="endTimeStr" width="180" label="生效结束时间" />
+        <el-table-column prop="statusStr" width="80" label="状态" />
+        <el-table-column prop="remark" width="250" label="备注" />
+        <el-table-column fixed="right" label="操作" width="160">
           <template slot-scope="scope">
             <el-button
               v-show="scope.row.id !== 1"
@@ -36,6 +36,18 @@
               size="small"
               @click="handleDeleteClick(scope.row)"
             >删除</el-button>
+            <el-button
+              v-show="scope.row.id !== 1"
+              type="text"
+              size="small"
+              @click="handleResetPwdClick(scope.row)"
+            >重置</el-button>
+            <el-button
+              v-show="scope.row.id !== 1"
+              type="text"
+              size="small"
+              @click="handleRoleClick(scope.row)"
+            >角色</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -56,23 +68,34 @@
         <el-button type="primary" @click="onAddUserOK">确 定</el-button>
       </span>
     </el-dialog>
+    <el-dialog title="设置角色" :visible.sync="isSetRoleVisible" width="40%" top="10px">
+      <UserRole ref="userRole" />
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="isSetRoleVisible = false">取 消</el-button>
+        <el-button type="primary" @click="onSetUserRoleOK">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
 import * as userApi from '@/api/user'
-import { MessageBox, Message } from 'element-ui'
+import { mapGetters } from 'vuex'
 import UserNew from './components/UserNew'
+import UserRole from './components/UserRole'
 import dayjs from 'dayjs'
+
 export default {
   name: 'User',
   components: {
-    UserNew
+    UserNew,
+    UserRole
   },
   data() {
     return {
       userNewTitle: '添加用户',
       isAddUserVisible: false,
       curUser: null,
+      isSetRoleVisible: false,
       formData: {
         name: '',
         companyId: null,
@@ -83,6 +106,11 @@ export default {
       curPageIndex: 1,
       curPageSize: 10
     }
+  },
+  computed: {
+    ...mapGetters({
+      userId: 'userId'
+    })
   },
   mounted() {
     this.queryUsers()
@@ -100,7 +128,7 @@ export default {
       const data = this.$refs.userNew.getData()
       if (!data.id) {
         userApi.addUser(data).then(d => {
-          Message({
+          this.$message({
             message: '添加成功',
             type: 'success'
           })
@@ -109,7 +137,7 @@ export default {
         })
       } else {
         userApi.updateUser(data).then(d => {
-          Message({
+          this.$message({
             message: '修改成功',
             type: 'success'
           })
@@ -132,14 +160,21 @@ export default {
       this.isAddUserVisible = true
     },
     handleDeleteClick(data) {
-      MessageBox.confirm('确认删除该用户？', '删除', {
+      if (this.userId === data.id) {
+        this.$message({
+          message: '当前登录用户无法删除',
+          type: 'error'
+        })
+        return
+      }
+      this.$confirm('确认删除该用户？', '删除', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         userApi.deleteUser(data.id).then(d => {
           if (d.code === 20000) {
-            Message({
+            this.$message({
               message: '删除成功',
               type: 'success'
             })
@@ -150,6 +185,38 @@ export default {
             this.queryUsers()
           }
         })
+      })
+    },
+    handleResetPwdClick(data) {
+      this.$confirm('确认重置用户密码？', '重置密码', {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        userApi.resetPassword(data.id).then(d => {
+          if (d.code === 20000) {
+            this.$message({
+              message: '重置成功',
+              type: 'success'
+            })
+          }
+        })
+      })
+    },
+    handleRoleClick(data) {
+      this.curUser = data
+      this.isSetRoleVisible = true
+      this.$nextTick(() => {
+        this.$refs.userRole.resetView(data.id)
+      })
+    },
+    onSetUserRoleOK() {
+      userApi.setUserRole(this.curUser.id, this.$refs.userRole.getSelectedRoles()).then(d => {
+        this.$message({
+          message: '设置角色成功',
+          type: 'success'
+        })
+        this.isSetRoleVisible = false
       })
     },
     queryUsers() {

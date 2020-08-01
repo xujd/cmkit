@@ -11,22 +11,25 @@ import (
 
 // AuthEndpoints 权限的Endpoint
 type AuthEndpoints struct {
-	LoginEndpoint         endpoint.Endpoint
-	RenewvalEndpoint      endpoint.Endpoint
-	AddUserEndpoint       endpoint.Endpoint
-	UpdateUserEndpoint    endpoint.Endpoint
-	DeleteUserEndpoint    endpoint.Endpoint
-	QueryUserByIDEndpoint endpoint.Endpoint
-	ListUsersEndpoint     endpoint.Endpoint
-	GetUserInfoEndpoint   endpoint.Endpoint
-	LogoutEndpoint        endpoint.Endpoint
-	AddRoleEndpoint       endpoint.Endpoint
-	UpdateRoleEndpoint    endpoint.Endpoint
-	DeleteRoleEndpoint    endpoint.Endpoint
-	ListRolesEndpoint     endpoint.Endpoint
-	SetUserRoleEndpoint   endpoint.Endpoint
-	SetRoleFuncsEndpoint  endpoint.Endpoint
-	GetRoleFuncsEndpoint  endpoint.Endpoint
+	LoginEndpoint          endpoint.Endpoint
+	RenewvalEndpoint       endpoint.Endpoint
+	AddUserEndpoint        endpoint.Endpoint
+	UpdateUserEndpoint     endpoint.Endpoint
+	DeleteUserEndpoint     endpoint.Endpoint
+	QueryUserByIDEndpoint  endpoint.Endpoint
+	ListUsersEndpoint      endpoint.Endpoint
+	GetUserInfoEndpoint    endpoint.Endpoint
+	LogoutEndpoint         endpoint.Endpoint
+	AddRoleEndpoint        endpoint.Endpoint
+	UpdateRoleEndpoint     endpoint.Endpoint
+	DeleteRoleEndpoint     endpoint.Endpoint
+	ListRolesEndpoint      endpoint.Endpoint
+	SetUserRoleEndpoint    endpoint.Endpoint
+	GetUserRoleEndpoint    endpoint.Endpoint
+	SetRoleFuncsEndpoint   endpoint.Endpoint
+	GetRoleFuncsEndpoint   endpoint.Endpoint
+	ResetPasswordEndpoint  endpoint.Endpoint
+	UpdatePasswordEndpoint endpoint.Endpoint
 }
 
 // AuthRequest 登录请求
@@ -72,28 +75,38 @@ func CreateEndpoints(svc Service) AuthEndpoints {
 
 	setUserRoleEndpoint := MakeSetUserRoleEndpoint(svc)
 	setUserRoleEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(setUserRoleEndpoint)
+	getUserRoleEndpoint := MakeGetUserRoleEndpoint(svc)
+	getUserRoleEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(getUserRoleEndpoint)
 	setRoleFuncsEndpoint := MakeSetRoleFuncsEndpoint(svc)
 	setRoleFuncsEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(setRoleFuncsEndpoint)
 	getRoleFuncsEndpoint := MakeGetRoleFuncsEndpoint(svc)
 	getRoleFuncsEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(getRoleFuncsEndpoint)
 
+	resetPasswordEndpoint := MakeResetPasswordEndpoint(svc)
+	resetPasswordEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(resetPasswordEndpoint)
+	updatePasswordEndpoint := MakeUpdatePasswordEndpoint(svc)
+	updatePasswordEndpoint = kitjwt.NewParser(JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(updatePasswordEndpoint)
+
 	authEndpoints := AuthEndpoints{
-		LoginEndpoint:         loginEndpoint,
-		RenewvalEndpoint:      renewvalEndpoint,
-		AddUserEndpoint:       addUserEndpoint,
-		UpdateUserEndpoint:    updateUserEndpoint,
-		DeleteUserEndpoint:    deleteUserEndpoint,
-		QueryUserByIDEndpoint: queryUserByIDEndpoint,
-		ListUsersEndpoint:     listUsersEndpoint,
-		GetUserInfoEndpoint:   getUserInfoEndpoint,
-		LogoutEndpoint:        logoutEndpoint,
-		AddRoleEndpoint:       addRoleEndpoint,
-		UpdateRoleEndpoint:    updateRoleEndpoint,
-		DeleteRoleEndpoint:    deleteRoleEndpoint,
-		ListRolesEndpoint:     listRolesEndpoint,
-		SetUserRoleEndpoint:   setUserRoleEndpoint,
-		SetRoleFuncsEndpoint:  setRoleFuncsEndpoint,
-		GetRoleFuncsEndpoint:  getRoleFuncsEndpoint,
+		LoginEndpoint:          loginEndpoint,
+		RenewvalEndpoint:       renewvalEndpoint,
+		AddUserEndpoint:        addUserEndpoint,
+		UpdateUserEndpoint:     updateUserEndpoint,
+		DeleteUserEndpoint:     deleteUserEndpoint,
+		QueryUserByIDEndpoint:  queryUserByIDEndpoint,
+		ListUsersEndpoint:      listUsersEndpoint,
+		GetUserInfoEndpoint:    getUserInfoEndpoint,
+		LogoutEndpoint:         logoutEndpoint,
+		AddRoleEndpoint:        addRoleEndpoint,
+		UpdateRoleEndpoint:     updateRoleEndpoint,
+		DeleteRoleEndpoint:     deleteRoleEndpoint,
+		ListRolesEndpoint:      listRolesEndpoint,
+		SetUserRoleEndpoint:    setUserRoleEndpoint,
+		GetUserRoleEndpoint:    getUserRoleEndpoint,
+		SetRoleFuncsEndpoint:   setRoleFuncsEndpoint,
+		GetRoleFuncsEndpoint:   getRoleFuncsEndpoint,
+		ResetPasswordEndpoint:  resetPasswordEndpoint,
+		UpdatePasswordEndpoint: updatePasswordEndpoint,
 	}
 
 	return authEndpoints
@@ -312,6 +325,20 @@ func MakeSetUserRoleEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 
+// MakeGetUserRoleEndpoint 获取用户角色
+func MakeGetUserRoleEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.BaseModel)
+		result, err := svc.GetUserRole(req.ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
 // MakeSetRoleFuncsEndpoint 设置角色权限
 func MakeSetRoleFuncsEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
@@ -331,6 +358,35 @@ func MakeGetRoleFuncsEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(models.BaseModel)
 		result, err := svc.GetRoleFuncs(req.ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeResetPasswordEndpoint 重置密码
+func MakeResetPasswordEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(map[string]interface{})
+		result, err := svc.ResetPassword(uint(req["userId"].(float64)))
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeUpdatePasswordEndpoint 修改密码
+func MakeUpdatePasswordEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(map[string]interface{})
+
+		result, err := svc.UpdatePassword(uint(req["userId"].(float64)), req["password"].(string), req["newPassword"].(string))
 
 		if err != nil {
 			return nil, err

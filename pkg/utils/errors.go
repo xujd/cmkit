@@ -23,6 +23,8 @@ var (
 	ErrNotFound = errors.New("未找到数据表或相关记录")
 	// ErrUserPwdDismatch 用户名或密码错误
 	ErrUserPwdDismatch = errors.New("用户名或密码错误")
+	// ErrPwdDismatch 密码错误
+	ErrPwdDismatch = errors.New("密码错误")
 	// ErrUserStatus 用户状态异常
 	ErrUserStatus = errors.New("用户状态异常")
 	// ErrBadQueryParams 查询参数错误

@@ -31,6 +31,11 @@
               {{ $t('navbar.profile') }}
             </el-dropdown-item>
           </router-link>
+          <router-link v-if="userId>1" to="/auth/password">
+            <el-dropdown-item>
+              修改密码
+            </el-dropdown-item>
+          </router-link>
           <router-link to="/">
             <el-dropdown-item>
               {{ $t('navbar.dashboard') }}
@@ -77,7 +82,8 @@ export default {
     ...mapGetters([
       'sidebar',
       'avatar',
-      'device'
+      'device',
+      'userId'
     ])
   },
   methods: {

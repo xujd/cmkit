@@ -112,8 +112,8 @@ export const asyncRoutes = [
     name: 'Res',
     meta: {
       title: '资产管理',
-      icon: 'el-icon-s-help',
-      roles: ['admin', 'editor']
+      icon: 'el-icon-s-help'
+      // roles: ['admin']
     },
     children: [
       {
@@ -121,8 +121,8 @@ export const asyncRoutes = [
         component: () => import('@/views/res/sling'),
         name: 'Sling',
         meta: {
-          title: '吊索具',
-          roles: ['admin']
+          title: '吊索具'
+          // roles: ['admin']
         }
       },
       {
@@ -130,8 +130,8 @@ export const asyncRoutes = [
         component: () => import('@/views/res/smart-cabinet'),
         name: 'SmartCabinet',
         meta: {
-          title: '智能柜',
-          roles: ['admin']
+          title: '智能柜'
+          // roles: ['admin']
         }
       }
     ]
@@ -144,8 +144,8 @@ export const asyncRoutes = [
     name: 'Apply',
     meta: {
       title: '使用管理',
-      icon: 'el-icon-s-promotion',
-      roles: ['admin', 'editor']
+      icon: 'el-icon-s-promotion'
+      // roles: ['admin']
     },
     children: [
       {
@@ -153,8 +153,8 @@ export const asyncRoutes = [
         component: () => import('@/views/apply/borrow'),
         name: 'Borrow',
         meta: {
-          title: '借用',
-          roles: ['admin']
+          title: '借用'
+          // roles: ['admin']
         }
       },
       {
@@ -162,8 +162,8 @@ export const asyncRoutes = [
         component: () => import('@/views/apply/return'),
         name: 'Return',
         meta: {
-          title: '归还',
-          roles: ['admin']
+          title: '归还'
+          // roles: ['admin']
         }
       }
     ]
@@ -176,8 +176,8 @@ export const asyncRoutes = [
     name: 'Maintain',
     meta: {
       title: '维护管理',
-      icon: 'el-icon-s-claim',
-      roles: ['admin', 'editor']
+      icon: 'el-icon-s-claim'
+      // roles: ['admin']
     },
     children: [
       {
@@ -185,8 +185,8 @@ export const asyncRoutes = [
         component: () => import('@/views/maintain/inspection'),
         name: 'Inspection',
         meta: {
-          title: '巡检',
-          roles: ['admin']
+          title: '巡检'
+          // roles: ['admin']
         }
       },
       {
@@ -194,8 +194,8 @@ export const asyncRoutes = [
         component: () => import('@/views/maintain/flaw-detection'),
         name: 'FlawDetection',
         meta: {
-          title: '探伤',
-          roles: ['admin']
+          title: '探伤'
+          // roles: ['admin']
         }
       },
       {
@@ -203,8 +203,8 @@ export const asyncRoutes = [
         component: () => import('@/views/maintain/inspection-rule'),
         name: 'InspectionRule',
         meta: {
-          title: '巡检规则',
-          roles: ['admin']
+          title: '巡检规则'
+          // roles: ['admin']
         }
       }
     ]
@@ -217,8 +217,8 @@ export const asyncRoutes = [
     name: 'Auth',
     meta: {
       title: '系统管理',
-      icon: 'lock',
-      roles: ['admin', 'editor']
+      icon: 'lock'
+      // roles: ['admin']
     },
     children: [
       {
@@ -226,8 +226,18 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/user'),
         name: 'User',
         meta: {
-          title: '用户管理',
-          roles: ['admin']
+          title: '用户管理'
+          // roles: ['admin']
+        }
+      },
+      {
+        path: 'password',
+        component: () => import('@/views/auth/password'),
+        name: 'Password',
+        hidden: true,
+        meta: {
+          title: '修改密码'
+          // roles: ['admin']
         }
       },
       {
@@ -244,8 +254,8 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/staff'),
         name: 'Staff',
         meta: {
-          title: '员工管理',
-          roles: ['admin']
+          title: '员工管理'
+          // roles: ['admin']
         }
       },
       {
@@ -253,8 +263,8 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/group'),
         name: 'GRoup',
         meta: {
-          title: '分组管理',
-          roles: ['admin']
+          title: '小组管理'
+          // roles: ['admin']
         }
       }
     ]

@@ -42,10 +42,16 @@ type Service interface {
 	ListRoles(name string, pageIndex int, pageSize int) (*models.SearchResult, error)
 	// 设置用户角色
 	SetUserRole(userID uint, roleIDs []uint) (string, error)
+	// 获取用户角色
+	GetUserRole(userID uint) (*[]models.UserRoleRelation, error)
 	// 设置角色权限
 	SetRoleFuncs(roleFunc models.RoleFunc) (string, error)
 	// 获取角色权限
 	GetRoleFuncs(roleID uint) (*models.RoleFunc, error)
+	// 重置密码
+	ResetPassword(userID uint) (string, error)
+	// 修改密码
+	UpdatePassword(userID uint, password string, newPassword string) (string, error)
 }
 
 // AuthService 权限服务
@@ -94,15 +100,12 @@ func (s AuthService) UpdateUser(user models.User) (string, error) {
 			return "", err
 		}
 	}
-	user0, err0 := s.QueryUserByID(user.ID)
+	_, err0 := s.QueryUserByID(user.ID)
 	if err0 != nil {
 		return "", utils.ErrUserNotFound
 	}
 	data := map[string]interface{}{
 		"Remark": user.Remark,
-	}
-	if user.Password != "" {
-		data["Password"] = fmt.Sprintf("%x", sha256.Sum256([]byte(user.Password+user0.Name)))
 	}
 	if user.StartTime != nil {
 		data["StartTime"] = user.StartTime
@@ -413,6 +416,21 @@ func (s AuthService) SetUserRole(userID uint, roleIDs []uint) (string, error) {
 	return "success", nil
 }
 
+// GetUserRole 查询用户角色
+func (s AuthService) GetUserRole(userID uint) (*[]models.UserRoleRelation, error) {
+	// 检查表是否存在
+	if !s.DB.HasTable(&models.UserRoleRelation{}) {
+		return nil, utils.ErrNotFound
+	}
+	fmt.Println("hello")
+	var userRoles []models.UserRoleRelation
+	if err := s.DB.Model(&models.UserRoleRelation{}).Where("user_id = ?", userID).Find(&userRoles).Error; err != nil {
+		return nil, err
+	}
+
+	return &userRoles, nil
+}
+
 // SetRoleFuncs 设置角色权限
 func (s AuthService) SetRoleFuncs(roleFunc models.RoleFunc) (string, error) {
 	// 检查表是否存在
@@ -448,4 +466,62 @@ func (s AuthService) GetRoleFuncs(roleID uint) (*models.RoleFunc, error) {
 	}
 
 	return &roleFunc, nil
+}
+
+// ResetPassword 重置密码
+func (s AuthService) ResetPassword(userID uint) (string, error) {
+	// 默认用户不准修改
+	if userID == 1 {
+		return "", utils.ErrNoUpdate
+	}
+	if !s.DB.HasTable(&models.User{}) {
+		if err := s.DB.CreateTable(&models.User{}).Error; err != nil {
+			return "", err
+		}
+	}
+	user0, err0 := s.QueryUserByID(userID)
+	if err0 != nil {
+		return "", utils.ErrUserNotFound
+	}
+	// 两次加密
+	password1 := fmt.Sprintf("%x", sha256.Sum256([]byte("123456a?"+user0.Name)))
+	data := map[string]interface{}{
+		"Password": fmt.Sprintf("%x", sha256.Sum256([]byte(password1+user0.Name))),
+	}
+	if err := s.DB.Model(&user0).Updates(data).Error; err != nil {
+		return "", err
+	}
+	return "success", nil
+}
+
+// UpdatePassword 修改密码
+func (s AuthService) UpdatePassword(userID uint, password string, newPassword string) (string, error) {
+	// 默认用户不准修改
+	if userID == 1 {
+		return "", utils.ErrNoUpdate
+	}
+	if !s.DB.HasTable(&models.User{}) {
+		return "", utils.ErrUserNotFound
+	}
+	// 查询用户是否存在
+	var user models.User
+	if err := s.DB.Where("id = ?", userID).First(&user).Error; err != nil {
+		return "", err
+	}
+	// 不存在
+	if user.ID == 0 {
+		return "", utils.ErrUserNotFound
+	}
+	// 确认密码
+	oldPassword := fmt.Sprintf("%x", sha256.Sum256([]byte(password+user.Name)))
+	if oldPassword != user.Password {
+		return "", utils.ErrPwdDismatch
+	}
+	data := map[string]interface{}{
+		"Password": fmt.Sprintf("%x", sha256.Sum256([]byte(newPassword+user.Name))),
+	}
+	if err := s.DB.Model(&user).Updates(data).Error; err != nil {
+		return "", err
+	}
+	return "success", nil
 }
