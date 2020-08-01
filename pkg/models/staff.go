@@ -10,7 +10,7 @@ type Staff struct {
 	DepartmentID   uint      `json:"departmentId"`                   // 部门ID
 	PostName       string    `json:"postName"`                       // 职务
 	Birthday       *JSONTime `json:"birthday" gorm:"type:timestamp"` // 出生日期
-	Status         int16     `json:"status"`                         // 状态：0-正常，1-离职，2-停用
+	Status         int16     `json:"status"`                         // 状态：0-正常
 	Remark         string    `json:"remark"`                         // 说明
 }
 

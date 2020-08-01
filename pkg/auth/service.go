@@ -100,9 +100,9 @@ func (s AuthService) UpdateUser(user models.User) (string, error) {
 			return "", err
 		}
 	}
-	_, err0 := s.QueryUserByID(user.ID)
-	if err0 != nil {
-		return "", utils.ErrUserNotFound
+	user0, _ := s.QueryUserByName(user.Name)
+	if user0 != nil && user0.ID != user.ID {
+		return "", utils.ErrUserAlreadyExists
 	}
 	data := map[string]interface{}{
 		"Remark": user.Remark,
@@ -129,7 +129,7 @@ func (s AuthService) DeleteUser(id uint) (string, error) {
 		return "", utils.ErrNoDelete
 	}
 	if err := s.DB.Where("id = ?", id).Delete(&models.User{}).Error; err != nil {
-		return "", nil
+		return "", err
 	}
 	return "success", nil
 }
@@ -342,10 +342,12 @@ func (s AuthService) UpdateRole(role models.Role) (string, error) {
 			return "", err
 		}
 	}
-	_, err0 := s.QueryRoleByID(role.ID)
-	if err0 != nil {
-		return "", utils.ErrRoleNotFound
+
+	role0, _ := s.QueryRoleByName(role.Name)
+	if role0 != nil && role0.ID != role.ID {
+		return "", utils.ErrRoleAlreadyExists
 	}
+
 	if err := s.DB.Save(&role).Error; err != nil {
 		return "", err
 	}
@@ -359,7 +361,7 @@ func (s AuthService) DeleteRole(id uint) (string, error) {
 		return "", utils.ErrNoDelete
 	}
 	if err := s.DB.Where("id = ?", id).Delete(&models.Role{}).Error; err != nil {
-		return "", nil
+		return "", err
 	}
 	return "success", nil
 }
@@ -403,7 +405,7 @@ func (s AuthService) SetUserRole(userID uint, roleIDs []uint) (string, error) {
 	tx := s.DB.Begin()
 	// 先删除旧数据
 	if err := tx.Where("user_id = ?", userID).Delete(&models.UserRoleRelation{}).Error; err != nil {
-		return "", nil
+		return "", err
 	}
 	// 增加新关系
 	for _, value := range roleIDs {
@@ -422,7 +424,6 @@ func (s AuthService) GetUserRole(userID uint) (*[]models.UserRoleRelation, error
 	if !s.DB.HasTable(&models.UserRoleRelation{}) {
 		return nil, utils.ErrNotFound
 	}
-	fmt.Println("hello")
 	var userRoles []models.UserRoleRelation
 	if err := s.DB.Model(&models.UserRoleRelation{}).Where("user_id = ?", userID).Find(&userRoles).Error; err != nil {
 		return nil, err
@@ -443,7 +444,7 @@ func (s AuthService) SetRoleFuncs(roleFunc models.RoleFunc) (string, error) {
 	tx := s.DB.Begin()
 	// 先删除旧数据
 	if err := tx.Where("role_id = ?", roleFunc.ID).Delete(&models.RoleFunc{}).Error; err != nil {
-		return "", nil
+		return "", err
 	}
 	// 增加新关系
 	if err := tx.Create(&roleFunc).Error; err != nil {

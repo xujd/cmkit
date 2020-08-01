@@ -6,6 +6,7 @@ require (
 	cmkit/pkg/auth v0.0.0-00010101000000-000000000000
 	cmkit/pkg/hello v0.0.0-00010101000000-000000000000
 	cmkit/pkg/models v0.0.0-00010101000000-000000000000 // indirect
+	cmkit/pkg/res v0.0.0-00010101000000-000000000000
 	cmkit/pkg/sys v0.0.0-00010101000000-000000000000
 	cmkit/pkg/utils v0.0.0-00010101000000-000000000000 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -25,3 +26,5 @@ replace cmkit/pkg/utils => ../pkg/utils
 replace cmkit/pkg/models => ../pkg/models
 
 replace cmkit/pkg/sys => ../pkg/sys
+
+replace cmkit/pkg/res => ../pkg/res

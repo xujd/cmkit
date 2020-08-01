@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"cmkit/pkg/models"
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	kitjwt "github.com/go-kit/kit/auth/jwt"
+	"github.com/gorilla/mux"
 )
 
 // EncodeError 对错误信息进行编码
@@ -93,4 +96,24 @@ func EncodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 		Message: "",
 	}
 	return json.NewEncoder(w).Encode(cmkitResponse)
+}
+
+// DecodeCommonRequest 通用Body请求解析
+func DecodeCommonRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var data map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// DecodeDataIDRequest 通用ID请求解析
+func DecodeDataIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
+	if !ok {
+		return nil, ErrBadQueryParams
+	}
+	userID, _ := strconv.Atoi(id)
+	return models.BaseModel{ID: uint(userID)}, nil
 }

@@ -66,7 +66,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 删除用户
 	deleteUserHandler := kithttp.NewServer(
 		endpoints.DeleteUserEndpoint,
-		decodeDataIDRequest,
+		utils.DecodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -76,7 +76,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 查询用户
 	queryUserByIDHandler := kithttp.NewServer(
 		endpoints.QueryUserByIDEndpoint,
-		decodeDataIDRequest,
+		utils.DecodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -133,7 +133,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 删除角色
 	deleteRoleHandler := kithttp.NewServer(
 		endpoints.DeleteRoleEndpoint,
-		decodeDataIDRequest,
+		utils.DecodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -153,7 +153,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 设置用户角色
 	setUserRoleHandler := kithttp.NewServer(
 		endpoints.SetUserRoleEndpoint,
-		decodeCommonRequest,
+		utils.DecodeCommonRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -162,7 +162,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 获取用户角色
 	getUserRoleHandler := kithttp.NewServer(
 		endpoints.GetUserRoleEndpoint,
-		decodeDataIDRequest,
+		utils.DecodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -182,7 +182,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 查询角色权限
 	getRoleFuncsHandler := kithttp.NewServer(
 		endpoints.GetRoleFuncsEndpoint,
-		decodeDataIDRequest,
+		utils.DecodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -192,7 +192,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 重置密码
 	resetPasswordHandler := kithttp.NewServer(
 		endpoints.ResetPasswordEndpoint,
-		decodeCommonRequest,
+		utils.DecodeCommonRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -202,7 +202,7 @@ func MakeHandler(endpoints AuthEndpoints, logger kitlog.Logger) http.Handler {
 	// 修改密码
 	updatePasswordHandler := kithttp.NewServer(
 		endpoints.UpdatePasswordEndpoint,
-		decodeCommonRequest,
+		utils.DecodeCommonRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -243,16 +243,6 @@ func decodeUpdateUserRequest(_ context.Context, r *http.Request) (interface{}, e
 	return user, nil
 }
 
-func decodeDataIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-	id, ok := vars["id"]
-	if !ok {
-		return nil, utils.ErrBadQueryParams
-	}
-	userID, _ := strconv.Atoi(id)
-	return models.BaseModel{ID: uint(userID)}, nil
-}
-
 func decodeUserListRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := r.URL.Query()
 	name := vars.Get("name")
@@ -284,14 +274,6 @@ func decodeUpdateRoleRequest(_ context.Context, r *http.Request) (interface{}, e
 		return nil, err
 	}
 	return role, nil
-}
-
-func decodeCommonRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var data map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		return nil, err
-	}
-	return data, nil
 }
 
 func decodeRoleFuncRequest(_ context.Context, r *http.Request) (interface{}, error) {

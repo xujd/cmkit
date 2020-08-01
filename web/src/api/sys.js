@@ -20,3 +20,11 @@ export function queryDepartments(name, companyId, pageSize, pageIndex) {
     method: 'get'
   })
 }
+
+// 查询字典数据
+export function queryDict(scene, type) {
+  return request({
+    url: `/sys/dict?scene=${scene}&type=${type}`,
+    method: 'get'
+  })
+}

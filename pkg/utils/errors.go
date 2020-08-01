@@ -43,4 +43,20 @@ var (
 	ErrNoDelete = errors.New("数据不允许删除")
 	// ErrNoUpdate 数据不允许修改
 	ErrNoUpdate = errors.New("数据不允许修改")
+	// ErrSlingNameIsNull 吊索具名称不能为空
+	ErrSlingNameIsNull = errors.New("吊索具名称不能为空")
+	// ErrSlingRfIDIsNull 吊索具RFID不能为空
+	ErrSlingRfIDIsNull = errors.New("吊索具RFID不能为空")
+	// ErrSlingAlreadyExists 吊索具名称或RFID重复
+	ErrSlingAlreadyExists = errors.New("吊索具名称或RFID重复")
+	// ErrSlingCabinetIsNull 吊索具存放位置不能为空
+	ErrSlingCabinetIsNull = errors.New("吊索具存放位置不能为空")
+	// ErrCabinetNameIsNull 智能柜名称不能为空
+	ErrCabinetNameIsNull = errors.New("智能柜名称不能为空")
+	// ErrCabinetAlreadyExists 智能柜名称重复
+	ErrCabinetAlreadyExists = errors.New("智能柜名称重复")
+	// ErrCabinetGridIsZero 智能柜箱格数不能是0
+	ErrCabinetGridIsZero = errors.New("智能柜箱格数不能是0")
+	// ErrGridAlreadyInUse 箱格已使用
+	ErrGridAlreadyInUse = errors.New("箱格已使用")
 )

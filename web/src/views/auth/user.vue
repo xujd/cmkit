@@ -97,9 +97,7 @@ export default {
       curUser: null,
       isSetRoleVisible: false,
       formData: {
-        name: '',
-        companyId: null,
-        departmentId: null
+        name: ''
       },
       tableData: [],
       dataTotal: 0,

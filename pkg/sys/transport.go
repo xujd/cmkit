@@ -68,7 +68,7 @@ func MakeHandler(endpoints SysEndpoints, logger kitlog.Logger) http.Handler {
 	// 删除员工
 	deleteStaffHandler := kithttp.NewServer(
 		endpoints.DeleteStaffEndpoint,
-		decodeDataIDRequest,
+		utils.DecodeDataIDRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
@@ -83,6 +83,16 @@ func MakeHandler(endpoints SysEndpoints, logger kitlog.Logger) http.Handler {
 	)
 
 	r.Handle("/sys/staffs", listStaffsHandler).Methods("GET")
+
+	// 查询字典
+	listDictDataHandler := kithttp.NewServer(
+		endpoints.ListDictDataEndpoint,
+		decodeDictDataSearchRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/sys/dict", listDictDataHandler).Methods("GET")
 
 	return r
 }
@@ -172,12 +182,10 @@ func decodeUpdateStaffRequest(_ context.Context, r *http.Request) (interface{}, 
 	return staff, nil
 }
 
-func decodeDataIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-	id, ok := vars["id"]
-	if !ok {
-		return nil, utils.ErrBadQueryParams
-	}
-	staffID, _ := strconv.Atoi(id)
-	return models.BaseModel{ID: uint(staffID)}, nil
+func decodeDictDataSearchRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := r.URL.Query()
+	scene := vars.Get("scene")
+	dictType := vars.Get("type")
+
+	return map[string]interface{}{"scene": scene, "dictType": dictType}, nil
 }

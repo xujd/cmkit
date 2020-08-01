@@ -18,6 +18,7 @@ import (
 
 	"cmkit/pkg/auth"
 	"cmkit/pkg/hello"
+	"cmkit/pkg/res"
 	"cmkit/pkg/sys"
 
 	"github.com/jinzhu/gorm"
@@ -99,6 +100,16 @@ func main() {
 	sysSvc = sys.NewInstrumentingMiddleware(requestCount, requestLatency, sysSvc)
 	sysEndpoints := sys.CreateEndpoints(sysSvc)
 
+	// 资源管理
+	var resSvc res.Service
+	resSvc = res.ResService{
+		DB: db,
+	}
+
+	resSvc = res.NewLoggingMiddleware(log.With(logger, "component", "res"), resSvc)
+	resSvc = res.NewInstrumentingMiddleware(requestCount, requestLatency, resSvc)
+	resEndpoints := res.CreateEndpoints(resSvc)
+
 	// 测试
 	var helloSvc hello.Service
 	helloSvc = hello.HelloService{}
@@ -115,6 +126,7 @@ func main() {
 	mux.Handle("/auth/", auth.MakeHandler(authEndpoints, httpLogger))
 	mux.Handle("/hello/", hello.MakeHandler(helloEndpoint, httpLogger))
 	mux.Handle("/sys/", sys.MakeHandler(sysEndpoints, httpLogger))
+	mux.Handle("/res/", res.MakeHandler(resEndpoints, httpLogger))
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 

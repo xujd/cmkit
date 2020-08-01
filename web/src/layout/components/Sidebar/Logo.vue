@@ -24,7 +24,7 @@ export default {
   },
   data() {
     return {
-      title: 'Vue Element Admin',
+      title: '智能资产管理',
       logo: './assets/logo.png'
     }
   }

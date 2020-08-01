@@ -22,6 +22,8 @@ type Service interface {
 	DeleteStaff(id uint) (string, error)
 	// 查询员工列表
 	ListStaffs(name string, companyID uint, departmentID uint, pageIndex int, pageSize int) (*models.SearchResult, error)
+	// 获取字典列表
+	ListDict(scene string, dictType string) (*[]models.DictData, error)
 }
 
 // SysService 基础服务
@@ -121,6 +123,10 @@ func (s SysService) UpdateStaff(staff models.Staff) (string, error) {
 			return "", err
 		}
 	}
+	// 员工姓名不能为空
+	if staff.Name == "" {
+		return "", utils.ErrStaffNameIsNull
+	}
 	if err := s.DB.Save(&staff).Error; err != nil {
 		return "", err
 	}
@@ -134,7 +140,7 @@ func (s SysService) DeleteStaff(id uint) (string, error) {
 		return "", utils.ErrNoDelete
 	}
 	if err := s.DB.Where("id = ?", id).Delete(&models.Staff{}).Error; err != nil {
-		return "", nil
+		return "", err
 	}
 	return "success", nil
 }
@@ -191,4 +197,27 @@ func (s SysService) ListStaffs(name string, companyID uint, departmentID uint, p
 	}
 
 	return &models.SearchResult{Total: rowCount, PageIndex: pageIndex, PageSize: pageSize, PageCount: pageCount, List: &staffs}, nil
+}
+
+// ListDict 查询字典
+func (s SysService) ListDict(scene string, dictType string) (*[]models.DictData, error) {
+	// 检查表是否存在
+	if !s.DB.HasTable(&models.DictData{}) {
+		return nil, utils.ErrNotFound
+	}
+	var dictDatas []models.DictData
+
+	db := s.DB.Model(&models.DictData{})
+
+	if scene != "" {
+		db = db.Where("scene = ?", scene)
+	}
+	if dictType != "" {
+		db = db.Where("type = ?", dictType)
+	}
+	if err := db.Find(&dictDatas).Error; err != nil {
+		return nil, err
+	}
+
+	return &dictDatas, nil
 }

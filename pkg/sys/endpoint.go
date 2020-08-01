@@ -18,6 +18,7 @@ type SysEndpoints struct {
 	UpdateStaffEndpoint     endpoint.Endpoint
 	DeleteStaffEndpoint     endpoint.Endpoint
 	ListStaffsEndpoint      endpoint.Endpoint
+	ListDictDataEndpoint    endpoint.Endpoint
 }
 
 // CreateEndpoints 创建SysEndpoints
@@ -34,6 +35,8 @@ func CreateEndpoints(svc Service) SysEndpoints {
 	deleteStaffEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(deleteStaffEndpoint)
 	listStaffsEndpoint := MakeListStaffsEndpoint(svc)
 	listStaffsEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(listStaffsEndpoint)
+	listDictDataEndpoint := MakeListDictDataEndpoint(svc)
+	listDictDataEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(listDictDataEndpoint)
 
 	sysEndpoints := SysEndpoints{
 		ListCompanysEndpoint:    listCompanysEndpoint,
@@ -42,6 +45,7 @@ func CreateEndpoints(svc Service) SysEndpoints {
 		UpdateStaffEndpoint:     updateStaffEndpoint,
 		DeleteStaffEndpoint:     deleteStaffEndpoint,
 		ListStaffsEndpoint:      listStaffsEndpoint,
+		ListDictDataEndpoint:    listDictDataEndpoint,
 	}
 
 	return sysEndpoints
@@ -125,6 +129,20 @@ func MakeListStaffsEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(map[string]interface{})
 		result, err := svc.ListStaffs(req["name"].(string), uint(req["companyId"].(int)), uint(req["departmentId"].(int)), req["pageIndex"].(int), req["pageSize"].(int))
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeListDictDataEndpoint 查询字典
+func MakeListDictDataEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(map[string]interface{})
+		result, err := svc.ListDict(req["scene"].(string), req["dictType"].(string))
 
 		if err != nil {
 			return nil, err
