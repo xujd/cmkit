@@ -2,7 +2,7 @@
   <section class="todoapp">
     <!-- header -->
     <header class="header">
-      <input class="new-todo" autocomplete="off" placeholder="Todo List" @keyup.enter="addTodo">
+      <input class="new-todo" autocomplete="off" placeholder="待办事件" @keyup.enter="addTodo">
     </header>
     <!-- main section -->
     <section v-show="todos.length" class="main">
@@ -20,7 +20,7 @@
       </ul>
     </section>
     <!-- footer -->
-    <footer v-show="todos.length" class="footer">
+    <footer v-show="false" class="footer">
       <span class="todo-count">
         <strong>{{ remaining }}</strong>
         {{ remaining | pluralize('item') }} left
@@ -47,14 +47,11 @@ const filters = {
   completed: todos => todos.filter(todo => todo.done)
 }
 const defalutList = [
-  { text: 'star this repository', done: false },
-  { text: 'fork this repository', done: false },
-  { text: 'follow author', done: false },
-  { text: 'vue-element-admin', done: true },
-  { text: 'vue', done: true },
-  { text: 'element-ui', done: true },
-  { text: 'axios', done: true },
-  { text: 'webpack', done: true }
+  { text: 'RF02吊索具需五天内完成巡检', done: false },
+  { text: '2号智能柜网络通信异常', done: false },
+  { text: 'RF113吊索具已超期五天', done: false },
+  { text: 'RF03吊索具上报异常处理', done: false },
+  { text: '张三预两天后借用一10吨位吊索具', done: false }
 ]
 export default {
   components: { Todo },

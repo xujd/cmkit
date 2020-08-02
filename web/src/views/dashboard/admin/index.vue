@@ -16,6 +16,14 @@
         </div>
       </el-col>
     </el-row>
+    <el-row :gutter="8">
+      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 8}" :xl="{span: 6}" style="margin-bottom:30px;">
+        <todo-list />
+      </el-col>
+      <el-col :xs="{span: 24}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 16}" :xl="{span: 6}" style="margin-bottom:30px;">
+        <box-card />
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -24,6 +32,8 @@ import PanelGroup from './components/PanelGroup'
 import RaddarChart from './components/RaddarChart'
 import PieChart from './components/PieChart'
 import BarChart from './components/BarChart'
+import TodoList from './components/TodoList'
+import BoxCard from './components/BoxCard'
 
 export default {
   name: 'DashboardAdmin',
@@ -31,7 +41,9 @@ export default {
     PanelGroup,
     RaddarChart,
     PieChart,
-    BarChart
+    BarChart,
+    TodoList,
+    BoxCard
   },
   data() {
     return {

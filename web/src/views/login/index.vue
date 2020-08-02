@@ -1,11 +1,13 @@
 <template>
   <div class="login-container">
+    <div class="login-header">
+      <img style="width: 32px; height: 32px;margin-right:11px;" :src="'./assets/logo.png'"><span>智能资产管理</span></div>
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">
+        <h4 class="title">
           {{ $t('login.title') }}
-        </h3>
+        </h4>
         <!-- <lang-select class="set-language" /> -->
       </div>
 
@@ -94,14 +96,14 @@ export default {
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('请输入用户名'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('密码不少于6位'))
       } else {
         callback()
       }
@@ -227,6 +229,16 @@ $cursor: #fff;
 
 /* reset element-ui css */
 .login-container {
+  .login-header {
+    height: 50px;
+    background: #2b2f3a;
+    color: #fff;
+    font-size: 20px;
+    line-height: 50px;
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+  }
   .el-input {
     display: inline-block;
     height: 47px;

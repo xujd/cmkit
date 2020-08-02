@@ -277,7 +277,8 @@ export const asyncRoutes = [
         }
       }
     ]
-  }
+  },
+  { path: '*', redirect: '/404', hidden: true }
 ]
 export const asyncRoutes111 = [
   {

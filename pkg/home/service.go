@@ -12,6 +12,8 @@ type Service interface {
 	StatSlingByTon() (*[]map[string]interface{}, error)
 	// 取使用次数最多的top10吊索具
 	GetSlingUsedTop() (*[]map[string]interface{}, error)
+	// 获取状态统计
+	StatSlingByStatus() (*[]map[string]interface{}, error)
 }
 
 // HomeService 首页服务
@@ -77,6 +79,36 @@ func (s HomeService) GetSlingUsedTop() (*[]map[string]interface{}, error) {
 		var resCount int
 		rows.Scan(&resName, &resCount)
 		result = append(result, map[string]interface{}{"resName": resName, "resCount": resCount})
+	}
+
+	return &result, nil
+}
+
+// StatSlingByStatus 获取状态统计
+func (s HomeService) StatSlingByStatus() (*[]map[string]interface{}, error) {
+	rows, err := s.DB.Raw(
+		`SELECT t_sys_dict.name, COALESCE(t1.count, 0) AS count FROM t_sys_dict
+		LEFT JOIN (SELECT use_status, COUNT(0) FROM t_res_sling WHERE deleted_at IS NULL GROUP BY use_status) t1 
+		ON t1.use_status = t_sys_dict.key
+		WHERE t_sys_dict.type = 'USE_STATUS_TYPE'
+		UNION
+		SELECT '点检'||t_sys_dict.name, COALESCE(t1.count, 0) AS count FROM t_sys_dict
+		LEFT JOIN (SELECT inspect_status, COUNT(0) FROM t_res_sling WHERE deleted_at IS NULL GROUP BY inspect_status) t1
+		ON t1.inspect_status = t_sys_dict.key
+		WHERE t_sys_dict.type = 'INSPECT_STATUS_TYPE'
+		UNION
+		SELECT '总数' AS name, COUNT(0) AS count FROM t_res_sling WHERE deleted_at IS NULL
+		ORDER BY name DESC`).Rows()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var result []map[string]interface{}
+	for rows.Next() {
+		var name string
+		var count int
+		rows.Scan(&name, &count)
+		result = append(result, map[string]interface{}{"name": name, "count": count})
 	}
 
 	return &result, nil

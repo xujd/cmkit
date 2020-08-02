@@ -23,3 +23,12 @@ export function getSlingUsedTop() {
         method: 'get'
     })
 }
+
+
+// 统计吊索具状态
+export function getSlingStatByStatus() {
+    return request({
+        url: '/home/stat_sling_by_status',
+        method: 'get'
+    })
+}

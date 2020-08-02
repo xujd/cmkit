@@ -51,5 +51,15 @@ func MakeHandler(endpoints HomeEndpoints, logger kitlog.Logger) http.Handler {
 	)
 
 	r.Handle("/home/sling_used_top", getSlingUsedTopHandler).Methods("GET")
+
+	// 获取状态统计
+	statSlingByStatusHandler := kithttp.NewServer(
+		endpoints.StatSlingByStatusEndpoint,
+		utils.DecodeNullRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/home/stat_sling_by_status", statSlingByStatusHandler).Methods("GET")
 	return r
 }
