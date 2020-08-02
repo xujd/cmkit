@@ -117,3 +117,8 @@ func DecodeDataIDRequest(_ context.Context, r *http.Request) (interface{}, error
 	userID, _ := strconv.Atoi(id)
 	return models.BaseModel{ID: uint(userID)}, nil
 }
+
+// DecodeNullRequest 空请求解析
+func DecodeNullRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	return nil, nil
+}

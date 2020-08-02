@@ -18,6 +18,7 @@ import (
 
 	"cmkit/pkg/auth"
 	"cmkit/pkg/hello"
+	"cmkit/pkg/home"
 	"cmkit/pkg/res"
 	"cmkit/pkg/sys"
 
@@ -110,6 +111,16 @@ func main() {
 	resSvc = res.NewInstrumentingMiddleware(requestCount, requestLatency, resSvc)
 	resEndpoints := res.CreateEndpoints(resSvc)
 
+	// 首页
+	var homeSvc home.Service
+	homeSvc = home.HomeService{
+		DB: db,
+	}
+
+	homeSvc = home.NewLoggingMiddleware(log.With(logger, "component", "home"), homeSvc)
+	homeSvc = home.NewInstrumentingMiddleware(requestCount, requestLatency, homeSvc)
+	homeEndpoints := home.CreateEndpoints(homeSvc)
+
 	// 测试
 	var helloSvc hello.Service
 	helloSvc = hello.HelloService{}
@@ -127,6 +138,7 @@ func main() {
 	mux.Handle("/hello/", hello.MakeHandler(helloEndpoint, httpLogger))
 	mux.Handle("/sys/", sys.MakeHandler(sysEndpoints, httpLogger))
 	mux.Handle("/res/", res.MakeHandler(resEndpoints, httpLogger))
+	mux.Handle("/home/", home.MakeHandler(homeEndpoints, httpLogger))
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 

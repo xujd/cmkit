@@ -79,7 +79,7 @@ export const constantRoutes = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: 'dashboard', icon: 'dashboard', affix: true }
+        meta: { title: 'dashboard', icon: 'dashboard', affix: true, noCache: true }
       }
     ]
   },
@@ -121,7 +121,7 @@ export const asyncRoutes = [
         component: () => import('@/views/res/sling'),
         name: 'Sling',
         meta: {
-          title: '吊索具'
+          title: '吊索具', noCache: true
           // roles: ['admin']
         }
       },
@@ -130,7 +130,7 @@ export const asyncRoutes = [
         component: () => import('@/views/res/smart-cabinet'),
         name: 'SmartCabinet',
         meta: {
-          title: '智能柜'
+          title: '智能柜', noCache: true
           // roles: ['admin']
         }
       }
@@ -153,7 +153,7 @@ export const asyncRoutes = [
         component: () => import('@/views/apply/borrow'),
         name: 'Borrow',
         meta: {
-          title: '借用'
+          title: '借用', noCache: true
           // roles: ['admin']
         }
       },
@@ -162,7 +162,16 @@ export const asyncRoutes = [
         component: () => import('@/views/apply/return'),
         name: 'Return',
         meta: {
-          title: '归还'
+          title: '归还', noCache: true
+          // roles: ['admin']
+        }
+      },
+      {
+        path: 'reslog',
+        component: () => import('@/views/apply/reslog'),
+        name: 'ResLog',
+        meta: {
+          title: '日志', noCache: true
           // roles: ['admin']
         }
       }
@@ -185,7 +194,7 @@ export const asyncRoutes = [
         component: () => import('@/views/maintain/inspection'),
         name: 'Inspection',
         meta: {
-          title: '巡检'
+          title: '巡检', noCache: true
           // roles: ['admin']
         }
       },
@@ -194,7 +203,7 @@ export const asyncRoutes = [
         component: () => import('@/views/maintain/flaw-detection'),
         name: 'FlawDetection',
         meta: {
-          title: '探伤'
+          title: '探伤', noCache: true
           // roles: ['admin']
         }
       },
@@ -203,7 +212,7 @@ export const asyncRoutes = [
         component: () => import('@/views/maintain/inspection-rule'),
         name: 'InspectionRule',
         meta: {
-          title: '巡检规则'
+          title: '巡检规则', noCache: true
           // roles: ['admin']
         }
       }
@@ -226,7 +235,7 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/user'),
         name: 'User',
         meta: {
-          title: '用户管理'
+          title: '用户管理', noCache: true
           // roles: ['admin']
         }
       },
@@ -236,7 +245,7 @@ export const asyncRoutes = [
         name: 'Password',
         hidden: true,
         meta: {
-          title: '修改密码'
+          title: '修改密码', noCache: true
           // roles: ['admin']
         }
       },
@@ -245,7 +254,7 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/role'),
         name: 'Role',
         meta: {
-          title: '角色管理'
+          title: '角色管理', noCache: true
           // if do not set roles, means: this page does not require permission
         }
       },
@@ -254,7 +263,7 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/staff'),
         name: 'Staff',
         meta: {
-          title: '员工管理'
+          title: '员工管理', noCache: true
           // roles: ['admin']
         }
       },
@@ -263,7 +272,7 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/group'),
         name: 'GRoup',
         meta: {
-          title: '小组管理'
+          title: '小组管理', noCache: true
           // roles: ['admin']
         }
       }

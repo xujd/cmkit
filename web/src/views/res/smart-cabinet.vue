@@ -15,26 +15,19 @@
     </el-card>
     <el-card class="result-box">
       <el-table height="300" :data="tableData" style="width: 100%">
-        <el-table-column prop="id" label="编号" width="80"/>
-        <el-table-column prop="name" label="智能柜名称" width="120"/>
-        <el-table-column prop="location" label="所在位置" width="250"/>
-        <el-table-column prop="gridCount" label="箱格数" width="80"/>
-        <el-table-column prop="usedCount" label="已使用" width="80"/>
-        <el-table-column prop="unUsedCount" label="未使用" width="80"/>
-        <el-table-column prop="statusStr" label="状态" width="80"/>
-        <el-table-column prop="remark" label="备注" width="120"/>
+        <el-table-column prop="id" label="编号" width="80" />
+        <el-table-column prop="name" label="智能柜名称" width="120" />
+        <el-table-column prop="location" label="所在位置" width="250" />
+        <el-table-column prop="gridCount" label="箱格数" width="80" />
+        <el-table-column prop="usedCount" label="已使用" width="80" />
+        <el-table-column prop="unUsedCount" label="未使用" width="80" />
+        <el-table-column prop="usedRate" label="使用率" width="80" />
+        <el-table-column prop="statusStr" label="状态" width="80" />
+        <el-table-column prop="remark" label="备注" width="120" />
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
-            <el-button
-              type="text"
-              size="small"
-              @click="handleEditClick(scope.row)"
-            >编辑</el-button>
-            <el-button
-              type="text"
-              size="small"
-              @click="handleDeleteClick(scope.row)"
-            >删除</el-button>
+            <el-button type="text" size="small" @click="handleEditClick(scope.row)">编辑</el-button>
+            <el-button type="text" size="small" @click="handleDeleteClick(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -152,6 +145,7 @@ export default {
       cabinetApi.queryCabinets(this.formData.name, this.curPageSize, this.curPageIndex).then(d => {
         d.data.list.forEach(item => {
           item.statusStr = item.status === 0 ? '有效' : '无效'
+          item.usedRate = Math.round(item.usedCount * 100.0 / item.gridCount, 2) + '%'
         })
         this.tableData = d.data.list
         this.dataTotal = d.data.total

@@ -73,16 +73,8 @@
         <el-table-column prop="usePermission" label="领用权限" width="180" />
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
-            <el-button
-              type="text"
-              size="small"
-              @click="handleEditClick(scope.row)"
-            >编辑</el-button>
-            <el-button
-              type="text"
-              size="small"
-              @click="handleDeleteClick(scope.row)"
-            >删除</el-button>
+            <el-button type="text" size="small" @click="handleEditClick(scope.row)">编辑</el-button>
+            <el-button type="text" size="small" @click="handleDeleteClick(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -108,8 +100,8 @@
 <script>
 import * as slingApi from '@/api/sling'
 import { mapGetters, mapActions } from 'vuex'
-import queryDict from '@/api/sys'
 import SlingNew from './components/SlingNew'
+import * as _ from 'lodash'
 
 export default {
   name: 'Sling',
@@ -144,7 +136,7 @@ export default {
       slingTypes: 'slingTypes',
       slingTons: 'slingTons',
       slingUseStatus: 'slingUseStatus',
-      slingInspectStatus: 'slingInspectStatus',
+      slingInspectStatus: 'slingInspectStatus'
     })
   },
   methods: {
@@ -226,6 +218,7 @@ export default {
           item.useStatusStr = type ? type.name : '-'
           type = _.find(this.slingInspectStatus, t => t.key === item.inspectStatus)
           item.inspectStatusStr = type ? type.name : '-'
+          item.location = item.cabinetName ? item.cabinetName + ',' + item.gridNo + '号' : '-'
         })
         this.tableData = d.data.list
         this.dataTotal = d.data.total

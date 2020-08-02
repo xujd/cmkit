@@ -4,6 +4,7 @@ import store from '@/store'
 import { getToken } from '@/utils/auth'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
+import qs from 'qs'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 // create an axios instance
@@ -24,6 +25,12 @@ service.interceptors.request.use(
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
       config.headers['Authorization'] = getToken()
+    }
+    if (config.method == 'get') {
+      config.params = {
+        _t: Date.parse(new Date())/1000, 
+        ...config.params
+      }
     }
     return config
   },

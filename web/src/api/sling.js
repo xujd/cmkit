@@ -44,5 +44,3 @@ export function querySlings(data, pageSize, pageIndex) {
     method: 'get'
   })
 }
-
-

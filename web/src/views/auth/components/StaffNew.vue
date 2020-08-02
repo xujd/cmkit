@@ -102,6 +102,7 @@ export default {
   },
   methods: {
     onCompanyChange() {
+      this.formData.departmentId = null
       if (!this.formData.companyId) {
         this.departments = []
       } else {

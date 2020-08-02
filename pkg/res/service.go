@@ -27,13 +27,23 @@ type Service interface {
 	UpdateCabinet(cabinet Cabinet) (string, error)
 	// 删除智能柜
 	DeleteCabinet(id uint) (string, error)
+	// 查询箱格状态
+	ListCabinetGrids(cabinetID uint) (*models.SearchResult, error)
 	// 存
 	Store(cabinetID uint, gridNo uint, resID uint) (string, error)
-	// 取
-	Take(cabinetID uint, gridNo uint) (string, error)
+	// 取还
+	TakeReturn(cabinetID uint, gridNo uint, flag int) (string, error)
+	// 按资源ID取还
+	TakeReturnByResID(useLog UseLog) (string, error)
+	// 保存取还日志
+	SaveTakeReturnLog(useLog UseLog) (string, error)
+	// 查询取还日志
+	GetTakeReturnLog(resName string, takeStaff uint, returnStaff uint,
+		takeStartTime string, takeEndTime string, returnFlag int,
+		pageIndex int, pageSize int) (*models.SearchResult, error)
 }
 
-// ResService 基础服务
+// ResService 资源服务
 type ResService struct {
 	DB *gorm.DB
 }
@@ -43,7 +53,12 @@ func (s ResService) ListSlings(name string, slingType uint, maxTonnage uint, use
 	if !s.DB.HasTable(&Sling{}) {
 		return nil, utils.ErrNotFound
 	}
-	slingdb := s.DB.Model(&Sling{})
+	slingdb := s.DB.Table("t_res_sling").
+		Select("t_res_sling.*, t_res_cabinet.name AS cabinet_name, t_res_cabinet_grid.cabinet_id AS cabinet_id, t_res_cabinet_grid.grid_no AS grid_no, t_res_cabinet_grid.is_out AS is_out, t1.use_count").
+		Joins("LEFT JOIN t_res_cabinet_grid ON t_res_cabinet_grid.in_res_id = t_res_sling.id").
+		Joins("LEFT JOIN t_res_cabinet ON t_res_cabinet_grid.cabinet_id = t_res_cabinet.id").
+		Joins("LEFT JOIN (SELECT t_res_use_log.res_id, COUNT(0) AS use_count FROM t_res_use_log GROUP BY t_res_use_log.res_id) t1 ON t1.res_id = t_res_sling.id").
+		Where("t_res_sling.deleted_at IS NULL")
 	if name != "" {
 		slingdb = slingdb.Where("name LIKE ?", "%"+name+"%")
 	}
@@ -104,6 +119,13 @@ func (s ResService) AddSling(sling Sling) (string, error) {
 	if err := s.DB.Create(&sling).Error; err != nil {
 		return "", err
 	}
+	// 保存位置数据
+	sling1, _ := s.QuerySlingByName(sling.Name, sling.RfID)
+	_, err1 := s.Store(sling.CabinetID, sling.GridNo, sling1.ID)
+	if err1 != nil { // 失败删除
+		s.DB.Unscoped().Where("id = ?", sling1.ID).Delete(&Sling{})
+		return "", err1
+	}
 	return "success", nil
 }
 
@@ -141,20 +163,39 @@ func (s ResService) UpdateSling(sling Sling) (string, error) {
 	}
 	// 名字或RFID重复
 	sling0, _ := s.QuerySlingByName(sling.Name, sling.RfID)
-	if sling0 != nil {
+	if sling0 != nil && sling0.ID != sling.ID {
 		return "", utils.ErrSlingAlreadyExists
 	}
-	if err := s.DB.Save(&sling).Error; err != nil {
+	// 事务
+	tx := s.DB.Begin()
+	if err := tx.Save(&sling).Error; err != nil {
+		tx.Rollback()
 		return "", err
 	}
+	// 保存位置数据
+	_, err1 := s.Store(sling.CabinetID, sling.GridNo, sling.ID)
+	if err1 != nil {
+		tx.Rollback()
+		return "", err1
+	}
+	tx.Commit()
 	return "success", nil
 }
 
 // DeleteSling 删除吊索具
 func (s ResService) DeleteSling(id uint) (string, error) {
-	if err := s.DB.Where("id = ?", id).Delete(&Sling{}).Error; err != nil {
+	// 事务
+	tx := s.DB.Begin()
+	if err := tx.Where("id = ?", id).Delete(&Sling{}).Error; err != nil {
+		tx.Rollback()
 		return "", err
 	}
+	// 删除占用的箱格
+	if err := tx.Where("in_res_id = ?", id).Delete(&CabinetGrid{}).Error; err != nil {
+		tx.Rollback()
+		return "", err
+	}
+	tx.Commit()
 	return "success", nil
 }
 
@@ -163,7 +204,10 @@ func (s ResService) ListCabinets(name string, pageIndex int, pageSize int) (*mod
 	if !s.DB.HasTable(&Cabinet{}) {
 		return nil, utils.ErrNotFound
 	}
-	cabinetdb := s.DB.Model(&Cabinet{})
+	cabinetdb := s.DB.Table("t_res_cabinet").
+		Select("t_res_cabinet.*, COALESCE(t1.used_count, 0) AS used_count, COALESCE(t_res_cabinet.grid_count - t1.used_count, t_res_cabinet.grid_count) AS un_used_count").
+		Joins("LEFT JOIN (SELECT t_res_cabinet_grid.cabinet_id, COUNT(0) AS used_count FROM t_res_cabinet_grid WHERE t_res_cabinet_grid.in_res_id > 0 AND t_res_cabinet_grid.deleted_at IS NULL GROUP BY cabinet_id) t1 ON t1.cabinet_id = t_res_cabinet.id").
+		Where("t_res_cabinet.deleted_at IS NULL")
 	if name != "" {
 		cabinetdb = cabinetdb.Where("name LIKE ?", "%"+name+"%")
 	}
@@ -225,6 +269,19 @@ func (s ResService) QueryCabinetByName(name string) (*Cabinet, error) {
 	return &cabinet, nil
 }
 
+// QueryCabinetByID 查询智能柜
+func (s ResService) QueryCabinetByID(id uint) (*Cabinet, error) {
+	if !s.DB.HasTable(&Cabinet{}) {
+		return nil, utils.ErrNotFound
+	}
+	var cabinet Cabinet
+	if err := s.DB.Where("id = ?", id).First(&cabinet).Error; err != nil {
+		return nil, err
+	}
+
+	return &cabinet, nil
+}
+
 // UpdateCabinet 修改智能柜
 func (s ResService) UpdateCabinet(cabinet Cabinet) (string, error) {
 	if !s.DB.HasTable(&Cabinet{}) {
@@ -270,6 +327,50 @@ func (s ResService) DeleteCabinet(id uint) (string, error) {
 	return "success", nil
 }
 
+// ListCabinetGrids 查询箱格列表
+func (s ResService) ListCabinetGrids(cabinetID uint) (*models.SearchResult, error) {
+	if !s.DB.HasTable(&CabinetGrid{}) {
+		if err := s.DB.CreateTable(&CabinetGrid{}).Error; err != nil {
+			return nil, err
+		}
+	}
+	// 智能柜
+	cabinet, err := s.QueryCabinetByID(cabinetID)
+	if err != nil || cabinet == nil {
+		return nil, utils.ErrNotFound
+	}
+
+	// 在用
+	griddb := s.DB.Model(&CabinetGrid{})
+	if cabinetID > 0 {
+		griddb = griddb.Where("cabinet_id = ?", cabinetID)
+	}
+
+	var grids []CabinetGrid
+	if err := griddb.Find(&grids).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]CabinetGrid, cabinet.GridCount)
+	for i := 0; i < int(cabinet.GridCount); i++ {
+		flag := false
+		for _, v := range grids {
+			if int(v.GridNo) == i+1 { // 已使用
+				data := &CabinetGrid{GridNo: uint(i + 1), CabinetID: cabinetID, InResID: v.InResID}
+				result[i] = *data
+				flag = true
+				break
+			}
+		}
+		if !flag { // 未使用
+			data := &CabinetGrid{GridNo: uint(i + 1), CabinetID: cabinetID, InResID: 0}
+			result[i] = *data
+		}
+	}
+
+	return &models.SearchResult{Total: len(result), PageIndex: 0, PageSize: 0, PageCount: 0, List: &result}, nil
+}
+
 // Store 存
 func (s ResService) Store(cabinetID uint, gridNo uint, resID uint) (string, error) {
 	if !s.DB.HasTable(&CabinetGrid{}) {
@@ -279,27 +380,147 @@ func (s ResService) Store(cabinetID uint, gridNo uint, resID uint) (string, erro
 	}
 	// 判重
 	var cabinetGrid CabinetGrid
-	if err := s.DB.Where("cabinet_id = ? and grid_no = ?", cabinetID, gridNo).First(&cabinetGrid).Error; err != nil {
-		return "", err
-	}
-	if cabinetGrid.InResID > 0 {
+	s.DB.Model(&CabinetGrid{}).Where("cabinet_id = ? and grid_no = ?", cabinetID, gridNo).First(&cabinetGrid)
+	if cabinetGrid.InResID > 0 && cabinetGrid.InResID != resID {
 		return "", utils.ErrGridAlreadyInUse
 	}
-	if err := s.DB.Create(&CabinetGrid{GridNo: gridNo, CabinetID: cabinetID, InResID: resID}).Error; err != nil {
-		return "", err
+	// 事务
+	tx := s.DB.Begin()
+	// 是否存在
+	var cabinetGrid0 CabinetGrid
+	if err0 := tx.Where("in_res_id = ?", resID).First(&cabinetGrid0).Error; err0 == nil {
+		// 更新
+		if err := tx.Model(&cabinetGrid0).Updates(CabinetGrid{CabinetID: cabinetID, GridNo: gridNo}).Error; err != nil {
+			tx.Rollback()
+			return "", err
+		}
+	} else {
+		// 创建新纪录
+		if err := tx.Create(&CabinetGrid{GridNo: gridNo, CabinetID: cabinetID, InResID: resID}).Error; err != nil {
+			tx.Rollback()
+			return "", err
+		}
 	}
+	tx.Commit()
 	return "success", nil
 }
 
-// Take 取
-func (s ResService) Take(cabinetID uint, gridNo uint) (string, error) {
+// TakeReturn 取-将is_out设置为1;还-将is_out设置为0
+func (s ResService) TakeReturn(cabinetID uint, gridNo uint, flag int) (string, error) {
 	if !s.DB.HasTable(&CabinetGrid{}) {
 		if err := s.DB.CreateTable(&CabinetGrid{}).Error; err != nil {
 			return "", err
 		}
 	}
-	if err := s.DB.Where("cabinet_id = ? and grid_no = ?", cabinetID, gridNo).Delete(&CabinetGrid{}).Error; err != nil {
+	if err := s.DB.Model(&CabinetGrid{}).Where("cabinet_id = ? and grid_no = ?", cabinetID, gridNo).Update("is_out", flag).Error; err != nil {
 		return "", err
 	}
 	return "success", nil
+}
+
+// TakeReturnByResID 按资源ID取-将is_out设置为1;还-将is_out设置为0
+func (s ResService) TakeReturnByResID(useLog UseLog) (string, error) {
+	if !s.DB.HasTable(&CabinetGrid{}) {
+		if err := s.DB.CreateTable(&CabinetGrid{}).Error; err != nil {
+			return "", err
+		}
+	}
+	// 事务
+	tx := s.DB.Begin()
+	if err := s.DB.Model(&CabinetGrid{}).Where("in_res_id = ?", useLog.ResID).Update("is_out", useLog.Flag).Error; err != nil {
+		tx.Rollback()
+		return "", err
+	}
+	// 修改使用状态，1-在库，2-借出
+	status := 1
+	if useLog.Flag == 1 {
+		status = 2
+	}
+	if err := s.DB.Model(&Sling{}).Where("id = ?", useLog.ResID).Update("use_status", status).Error; err != nil {
+		tx.Rollback()
+		return "", err
+	}
+	// 记录借出日志
+	if _, err1 := s.SaveTakeReturnLog(useLog); err1 != nil {
+		tx.Rollback()
+		return "", err1
+	}
+	tx.Commit()
+	return "success", nil
+}
+
+// SaveTakeReturnLog 取还日志
+func (s ResService) SaveTakeReturnLog(useLog UseLog) (string, error) {
+	if !s.DB.HasTable(&UseLog{}) {
+		if err := s.DB.CreateTable(&UseLog{}).Error; err != nil {
+			return "", err
+		}
+	}
+	if useLog.Flag == 1 { // 借出，直接入库
+		if err := s.DB.Create(&useLog).Error; err != nil {
+			return "", err
+		}
+	} else { // 归还，更新字段
+		var log UseLog
+		if err := s.DB.Raw("SELECT * FROM t_res_use_log WHERE res_id = ? AND created_at = (SELECT MAX(created_at) FROM t_res_use_log WHERE res_id = ?)", useLog.ResID, useLog.ResID).
+			Scan(&log).Error; err != nil {
+			return "", err
+		}
+		if err := s.DB.Model(&log).Updates(map[string]interface{}{"return_staff_id": useLog.ReturnStaffID, "return_time": useLog.ReturnTime, "remark": useLog.Remark}).Error; err != nil {
+			return "", err
+		}
+	}
+
+	return "success", nil
+}
+
+// GetTakeReturnLog 取还日志
+func (s ResService) GetTakeReturnLog(resName string, takeStaff uint, returnStaff uint,
+	takeStartTime string, takeEndTime string, returnFlag int,
+	pageIndex int, pageSize int) (*models.SearchResult, error) {
+	if !s.DB.HasTable(&Sling{}) {
+		return nil, utils.ErrNotFound
+	}
+	logdb := s.DB.Table("t_res_use_log").
+		Select("t_res_use_log.*, t_res_sling.name AS res_name, t1.name AS take_staff_name, t2.name AS return_staff_name").
+		Joins("LEFT JOIN t_res_sling ON t_res_use_log.res_id = t_res_sling.id").
+		Joins("LEFT JOIN t_sys_staff AS t1 ON t_res_use_log.take_staff_id = t1.id").
+		Joins("LEFT JOIN t_sys_staff AS t2 ON t_res_use_log.return_staff_id = t2.id").
+		Order("t_res_use_log.created_at desc")
+	if resName != "" {
+		logdb = logdb.Where("t_res_sling.name LIKE ?", "%"+resName+"%")
+	}
+	if takeStaff > 0 {
+		logdb = logdb.Where("t_res_use_log.take_staff_id = ?", takeStaff)
+	}
+	if returnStaff > 0 {
+		logdb = logdb.Where("t_res_use_log.return_staff_id = ?", returnStaff)
+	}
+	if takeStartTime != "" {
+		logdb = logdb.Where("t_res_use_log.take_time >= ?", takeStartTime)
+	}
+	if takeEndTime != "" {
+		logdb = logdb.Where("t_res_use_log.take_time <= ?", takeEndTime)
+	}
+	if returnFlag == 1 { // 已归还
+		logdb = logdb.Where("t_res_use_log.return_time IS NOT NULL")
+	} else if returnFlag == 2 { // 未归还
+		logdb = logdb.Where("t_res_use_log.return_time IS NULL")
+	}
+	if pageIndex == 0 {
+		pageIndex = 1
+	}
+	if pageSize == 0 {
+		pageSize = 10
+	}
+	var rowCount int
+	logdb.Count(&rowCount)                                             //总行数
+	pageCount := int(math.Ceil(float64(rowCount) / float64(pageSize))) // 总页数
+
+	var useLogs []UseLog
+	if err := logdb.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&useLogs).Error; err != nil {
+		return nil, err
+	}
+
+	return &models.SearchResult{Total: rowCount, PageIndex: pageIndex, PageSize: pageSize, PageCount: pageCount, List: &useLogs}, nil
 }

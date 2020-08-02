@@ -41,4 +41,10 @@ export function queryCabinets(name, pageSize, pageIndex) {
   })
 }
 
-
+// 查询箱格
+export function queryGrids(cabinetId) {
+  return request({
+    url: `/res/cabinet_grids/${cabinetId}`,
+    method: 'get'
+  })
+}

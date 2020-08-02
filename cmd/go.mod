@@ -5,6 +5,7 @@ go 1.13
 require (
 	cmkit/pkg/auth v0.0.0-00010101000000-000000000000
 	cmkit/pkg/hello v0.0.0-00010101000000-000000000000
+	cmkit/pkg/home v0.0.0-00010101000000-000000000000
 	cmkit/pkg/models v0.0.0-00010101000000-000000000000 // indirect
 	cmkit/pkg/res v0.0.0-00010101000000-000000000000
 	cmkit/pkg/sys v0.0.0-00010101000000-000000000000
@@ -28,3 +29,5 @@ replace cmkit/pkg/models => ../pkg/models
 replace cmkit/pkg/sys => ../pkg/sys
 
 replace cmkit/pkg/res => ../pkg/res
+
+replace cmkit/pkg/home => ../pkg/home

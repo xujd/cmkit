@@ -46,26 +46,30 @@
     </el-form-item>
     <el-form-item label="存放位置" prop="gridNo" required>
       <el-col :span="12">
-        <el-select v-model="formData.cabinetId" clearable placeholder="请选择">
+        <el-select
+          v-model="formData.cabinetId"
+          @change="onCabinetChange"
+          clearable
+          placeholder="请选择"
+        >
           <el-option
             v-for="item in cabinetList"
             :key="item.id"
             :label="item.name"
             :value="item.id"
           />
-        </el-select>
-        柜
+        </el-select>柜
       </el-col>
       <el-col :span="12">
         <el-select v-model="formData.gridNo" clearable placeholder="请选择">
           <el-option
             v-for="item in gridList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
+            :disabled="item.disabled"
+            :key="item.gridNo"
+            :label="item.gridNo"
+            :value="item.gridNo"
           />
-        </el-select>
-        格
+        </el-select>箱
       </el-col>
     </el-form-item>
     <el-form-item label="领用权限">
@@ -75,6 +79,8 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import { queryCabinets, queryGrids } from '@/api/cabinet'
+import * as _ from 'lodash'
 export default {
   name: 'SlingNew',
   props: {
@@ -131,8 +137,16 @@ export default {
             useStatus: newVal.useStatus === 0 ? null : newVal.useStatus,
             inspectStatus: newVal.inspectStatus === 0 ? null : newVal.inspectStatus,
             putTime: newVal.putTime,
-            usePermission: newVal.usePermission
+            usePermission: newVal.usePermission,
+            cabinetId: newVal.cabinetId,
+            gridNo: newVal.gridNo
           }
+          queryGrids(this.formData.cabinetId).then(d => {
+            d.data.list.forEach(item => {
+              item.disabled = item.inResId !== 0
+            })
+            this.gridList = d.data.list
+          })
         } else {
           this.formData = {
             rfId: '',
@@ -142,16 +156,35 @@ export default {
             useStatus: null,
             inspectStatus: null,
             putTime: null,
-            usePermission: ''
+            usePermission: '',
+            cabinetId: null,
+            gridNo: null
           }
+          this.gridList = []
         }
       },
       immediate: true
     }
   },
   mounted() {
+    queryCabinets('', 1000, 1).then(d => {
+      this.cabinetList = d.data.list
+    })
   },
   methods: {
+    onCabinetChange() {
+      this.formData.gridNo = null
+      if (!this.formData.cabinetId) {
+        this.gridList = []
+      } else {
+        queryGrids(this.formData.cabinetId).then(d => {
+          d.data.list.forEach(item => {
+            item.disabled = item.inResId !== 0
+          })
+          this.gridList = d.data.list
+        })
+      }
+    },
     resetData() {
       this.formData = {
         rfId: '',
@@ -161,7 +194,9 @@ export default {
         useStatus: null,
         inspectStatus: null,
         putTime: null,
-        usePermission: ''
+        usePermission: '',
+        cabinetId: null,
+        gridNo: null
       }
     },
     getData() {

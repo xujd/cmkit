@@ -6,6 +6,8 @@
 import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
+import { getSlingStatByTon } from '@/api/home'
+import * as _ from 'lodash'
 
 export default {
   mixins: [resize],
@@ -29,8 +31,8 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      this.initChart()
+    getSlingStatByTon().then(d => {
+      this.initChart(d.data)
     })
   },
   beforeDestroy() {
@@ -41,7 +43,7 @@ export default {
     this.chart = null
   },
   methods: {
-    initChart() {
+    initChart(data) {
       this.chart = echarts.init(this.$el, 'macarons')
 
       this.chart.setOption({
@@ -52,22 +54,16 @@ export default {
         legend: {
           left: 'center',
           bottom: '10',
-          data: ['Industries', 'Technology', 'Forex', 'Gold', 'Forecasts']
+          data: _.map(data, 'tonType')
         },
         series: [
           {
-            name: 'WEEKLY WRITE ARTICLES',
+            name: '吊索具吨位统计',
             type: 'pie',
             roseType: 'radius',
             radius: [15, 95],
             center: ['50%', '38%'],
-            data: [
-              { value: 320, name: 'Industries' },
-              { value: 240, name: 'Technology' },
-              { value: 149, name: 'Forex' },
-              { value: 100, name: 'Gold' },
-              { value: 59, name: 'Forecasts' }
-            ],
+            data: _.map(data, item => { return { value: item.resCount, name: item.tonType } }),
             animationEasing: 'cubicInOut',
             animationDuration: 2600
           }

@@ -101,6 +101,16 @@ func MakeHandler(endpoints ResEndpoints, logger kitlog.Logger) http.Handler {
 
 	r.Handle("/res/cabinet/{id}", deleteCabinetHandler).Methods("DELETE")
 
+	// 查询箱格
+	listGridsHandler := kithttp.NewServer(
+		endpoints.ListCabinetGridsEndpoint,
+		utils.DecodeDataIDRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/res/cabinet_grids/{id}", listGridsHandler).Methods("GET")
+
 	// 存
 	storeHandler := kithttp.NewServer(
 		endpoints.StoreEndpoint,
@@ -110,16 +120,34 @@ func MakeHandler(endpoints ResEndpoints, logger kitlog.Logger) http.Handler {
 	)
 
 	r.Handle("/res/store", storeHandler).Methods("POST")
-	// 取
-	takeHandler := kithttp.NewServer(
-		endpoints.TakeEndpoint,
+	// 存取
+	takeReturnHandler := kithttp.NewServer(
+		endpoints.TakeReturnEndpoint,
 		utils.DecodeCommonRequest,
 		utils.EncodeResponse,
 		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
 	)
 
-	r.Handle("/res/take", takeHandler).Methods("POST")
+	r.Handle("/res/take_return", takeReturnHandler).Methods("POST")
+	// 存取
+	takeReturnByResIDHandler := kithttp.NewServer(
+		endpoints.TakeReturnByResIDEndpoint,
+		decodeTakeReturnRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
 
+	r.Handle("/res/take_return_by_res", takeReturnByResIDHandler).Methods("POST")
+
+	// 查询使用日志
+	getResUseLogHandler := kithttp.NewServer(
+		endpoints.GetTakeReturnLogEndpoint,
+		decodeResUseLogSearchRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/res/uselog", getResUseLogHandler).Methods("GET")
 	return r
 }
 
@@ -207,4 +235,53 @@ func decodeCabinetRequest(_ context.Context, r *http.Request) (interface{}, erro
 		return nil, err
 	}
 	return cabinet, nil
+}
+
+func decodeTakeReturnRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var useLog UseLog
+	if err := json.NewDecoder(r.Body).Decode(&useLog); err != nil {
+		return nil, err
+	}
+	return useLog, nil
+}
+
+func decodeResUseLogSearchRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	vars := r.URL.Query()
+	resName := vars.Get("resName")
+	size := vars.Get("pageSize")
+	index := vars.Get("pageIndex")
+	pageSize, err := strconv.Atoi(size)
+	if err != nil {
+		pageSize = 10
+	}
+	pageIndex, err2 := strconv.Atoi(index)
+	if err2 != nil {
+		pageIndex = 1
+	}
+	flag := vars.Get("returnFlag")
+	returnFlag, err3 := strconv.Atoi(flag)
+	if err3 != nil {
+		returnFlag = 0
+	}
+	takeStaff := vars.Get("takeStaff")
+	takeStaffID, err4 := strconv.Atoi(takeStaff)
+	if err4 != nil {
+		takeStaffID = 0
+	}
+	returnStaff := vars.Get("returnStaff")
+	returnStaffID, err4 := strconv.Atoi(returnStaff)
+	if err4 != nil {
+		returnStaffID = 0
+	}
+
+	return map[string]interface{}{
+		"resName":       resName,
+		"pageSize":      pageSize,
+		"takeStaff":     takeStaffID,
+		"returnStaff":   returnStaffID,
+		"takeStartTime": vars.Get("takeStartTime"),
+		"takeEndTime":   vars.Get("takeEndTime"),
+		"returnFlag":    returnFlag,
+		"pageIndex":     pageIndex,
+	}, nil
 }

@@ -6,8 +6,8 @@
 import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
-
-const animationDuration = 6000
+import { getSlingUsedTop } from '@/api/home'
+const animationDuration = 3000
 
 export default {
   mixins: [resize],
@@ -31,8 +31,8 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      this.initChart()
+    getSlingUsedTop().then(d => {
+      this.initChart(d.data)
     })
   },
   beforeDestroy() {
@@ -43,10 +43,16 @@ export default {
     this.chart = null
   },
   methods: {
-    initChart() {
+    initChart(data) {
       this.chart = echarts.init(this.$el, 'macarons')
 
       this.chart.setOption({
+        title: {
+          text: '吊索具使用次数TOP10',
+          textStyle :{
+            fontSize: 14
+          }
+        },
         tooltip: {
           trigger: 'axis',
           axisPointer: { // 坐标轴指示器，坐标轴触发有效
@@ -54,7 +60,7 @@ export default {
           }
         },
         grid: {
-          top: 10,
+          top: 35,
           left: '2%',
           right: '2%',
           bottom: '3%',
@@ -62,7 +68,7 @@ export default {
         },
         xAxis: [{
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          data: _.map(data, 'resName'),
           axisTick: {
             alignWithLabel: true
           }
@@ -74,26 +80,16 @@ export default {
           }
         }],
         series: [{
-          name: 'pageA',
+          name: '使用次数',
           type: 'bar',
-          stack: 'vistors',
-          barWidth: '60%',
-          data: [79, 52, 200, 334, 390, 330, 220],
-          animationDuration
-        }, {
-          name: 'pageB',
-          type: 'bar',
-          stack: 'vistors',
-          barWidth: '60%',
-          data: [80, 52, 200, 334, 390, 330, 220],
-          animationDuration
-        }, {
-          name: 'pageC',
-          type: 'bar',
-          stack: 'vistors',
-          barWidth: '60%',
-          data: [30, 52, 200, 334, 390, 330, 220],
-          animationDuration
+          stack: 'count',
+          barWidth: '20%',
+          data: _.map(data, 'resCount'),
+          animationDuration,
+          label: {
+            show: true,
+            position: 'insideTop'
+          }
         }]
       })
     }

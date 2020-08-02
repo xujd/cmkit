@@ -25,6 +25,7 @@ type CabinetGrid struct {
 	GridNo    uint `json:"gridNo"`    // 箱格编号
 	CabinetID uint `json:"cabinetId"` // 智能柜ID
 	InResID   uint `json:"inResId"`   // 存放的资产ID，空为0
+	IsOut     uint `json:"isOut"`     // 是否借出
 }
 
 // TableName CabinetGrid

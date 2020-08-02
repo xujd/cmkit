@@ -1,5 +1,5 @@
 <template>
-  <div class="return-conaitner">
+  <div class="reslog-conaitner">
     <el-card class="search-box">
       <div style="position:relative;">
         <el-form :inline="true" :model="formData">
@@ -7,7 +7,17 @@
             <el-input v-model="formData.name" clearable placeholder="吊索具名称" />
           </el-form-item>
           <el-form-item label="借用人">
-            <el-select v-model="formData.staffId" filterable clearable placeholder="请选择">
+            <el-select v-model="formData.takeStaffId" filterable clearable placeholder="请选择">
+              <el-option
+                v-for="item in staffList"
+                :key="item.id"
+                :label="item.label"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="归还人">
+            <el-select v-model="formData.returnStaffId" filterable clearable placeholder="请选择">
               <el-option
                 v-for="item in staffList"
                 :key="item.id"
@@ -26,6 +36,16 @@
               end-placeholder="结束日期"
             ></el-date-picker>
           </el-form-item>
+          <el-form-item label="归还状态">
+            <el-select v-model="formData.returnFlag" filterable clearable placeholder="请选择">
+              <el-option
+                v-for="item in flagList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
         </el-form>
         <div class="action-div">
           <el-button type="primary" @click="onSubmit">查询</el-button>
@@ -41,12 +61,8 @@
         <el-table-column prop="returnPlanTime" label="预计归还时间" width="180" />
         <el-table-column prop="returnStaffName" label="归还人" width="100" />
         <el-table-column prop="returnTime" label="归还时间" width="180" />
+        <el-table-column prop="duration" label="使用时长" width="180" />
         <el-table-column prop="remark" label="用途说明" width="180" />
-        <el-table-column fixed="right" label="操作" width="100">
-          <template slot-scope="scope">
-            <el-button type="text" size="small" @click="handleEditClick(scope.row)">归还</el-button>
-          </template>
-        </el-table-column>
       </el-table>
       <el-pagination
         :current-page="curPageIndex"
@@ -58,21 +74,14 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
-    <el-dialog :title="returnTitle" :visible.sync="isReturnVisible" width="50%" top="10px">
-      <ReturnNew v-if="isReturnVisible" ref="returnNew" :useLog="curSling" />
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="isReturnVisible = false">取 消</el-button>
-        <el-button type="primary" @click="onReturnOK">确 定</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 <script>
 import * as applyApi from '@/api/apply'
 import { queryStaffs } from '@/api/staff'
-import { mapGetters, mapActions } from 'vuex'
 import ReturnNew from './components/ReturnNew'
 import * as _ from 'lodash'
+import dayjs from 'dayjs'
 export default {
   name: 'Return',
   components: {
@@ -80,19 +89,23 @@ export default {
   },
   data() {
     return {
-      returnTitle: '归还吊索具',
-      isReturnVisible: false,
-      curSling: null,
       formData: {
         name: '',
-        staffId: null,
-        takeTimes: []
+        takeStaffId: null,
+        returnStaffId: null,
+        takeTimes: [],
+        returnFlag: 0,
       },
       tableData: [],
       dataTotal: 0,
       curPageIndex: 1,
       curPageSize: 10,
-      staffList: []
+      staffList: [],
+      flagList: [
+        { id: 0, name: '全部' },
+        { id: 1, name: '已归还' },
+        { id: 2, name: '未归还' }
+      ]
     }
   },
   computed: {
@@ -110,17 +123,6 @@ export default {
     onSubmit() {
       this.queryUseLogs()
     },
-    onReturnOK() {
-      const data = this.$refs.returnNew.getData()
-      applyApi.returnSling(data).then(d => {
-        this.$message({
-          message: '归还成功',
-          type: 'success'
-        })
-        this.queryUseLogs()
-        this.isReturnVisible = false
-      })
-    },
     handleSizeChange(val) {
       this.curPageSize = val
       this.queryUseLogs()
@@ -133,17 +135,34 @@ export default {
       this.curSling = data
       this.isReturnVisible = true
     },
+    formatDuring(mss) {
+      var days = parseInt(mss / (1000 * 60 * 60 * 24));
+      var hours = parseInt((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = parseInt((mss % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = (mss % (1000 * 60)) / 1000;
+      return days + " 天 " + hours + " 小时 " + minutes + " 分钟 " + seconds + " 秒 ";
+    },
     queryUseLogs() {
       const query = {
         resName: this.formData.name,
-        returnFlag: 2,
-        takeStaff: this.formData.staffId,
+        returnFlag: this.formData.returnFlag,
+        takeStaff: this.formData.takeStaffId,
+        returnStaff: this.formData.returnStaffId
       }
       if (this.formData.takeTimes.length === 2) {
         query['takeStartTime'] = this.formData.takeTimes[0]
         query['takeEndTime'] = this.formData.takeTimes[1]
       }
       applyApi.getResUseLogs(query, this.curPageSize, this.curPageIndex).then(d => {
+        d.data.list.forEach(item => {
+          if (item.returnTime) {
+            let dur = dayjs(item.returnTime).diff(dayjs(item.takeTime))
+            if (dur < 0) {
+              dur = 0
+            }
+            item.duration = this.formatDuring(dur)
+          }
+        })
         this.tableData = d.data.list
         this.dataTotal = d.data.total
       })
@@ -152,7 +171,7 @@ export default {
 }
 </script>
 <style scoped>
-.return-conaitner {
+.reslog-conaitner {
   width: 100%;
   height: 100%;
   padding: 10px;
