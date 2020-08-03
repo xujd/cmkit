@@ -1,4 +1,6 @@
 *.exe
 go.sum
 node_modules
-dist
+/dist
+/cmd/nohup.out
+/cmd/cmkit
