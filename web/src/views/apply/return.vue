@@ -24,7 +24,7 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-            ></el-date-picker>
+            />
           </el-form-item>
         </el-form>
         <div class="action-div">
@@ -59,7 +59,7 @@
       />
     </el-card>
     <el-dialog :title="returnTitle" :visible.sync="isReturnVisible" width="50%" top="10px">
-      <ReturnNew v-if="isReturnVisible" ref="returnNew" :useLog="curSling" />
+      <ReturnNew v-if="isReturnVisible" ref="returnNew" :use-log="curSling" />
       <span slot="footer" class="dialog-footer">
         <el-button @click="isReturnVisible = false">取 消</el-button>
         <el-button type="primary" @click="onReturnOK">确 定</el-button>
@@ -70,9 +70,8 @@
 <script>
 import * as applyApi from '@/api/apply'
 import { queryStaffs } from '@/api/staff'
-import { mapGetters, mapActions } from 'vuex'
 import ReturnNew from './components/ReturnNew'
-import * as _ from 'lodash'
+
 export default {
   name: 'Return',
   components: {
@@ -137,7 +136,7 @@ export default {
       const query = {
         resName: this.formData.name,
         returnFlag: 2,
-        takeStaff: this.formData.staffId,
+        takeStaff: this.formData.staffId
       }
       if (this.formData.takeTimes.length === 2) {
         query['takeStartTime'] = this.formData.takeTimes[0]

@@ -7,6 +7,7 @@ import echarts from 'echarts'
 require('echarts/theme/macarons') // echarts theme
 import resize from './mixins/resize'
 import { getSlingUsedTop } from '@/api/home'
+import * as _ from 'lodash'
 const animationDuration = 3000
 
 export default {
@@ -49,7 +50,7 @@ export default {
       this.chart.setOption({
         title: {
           text: '吊索具使用次数TOP10',
-          textStyle :{
+          textStyle: {
             fontSize: 14
           }
         },

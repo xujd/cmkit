@@ -48,9 +48,9 @@
       <el-col :span="12">
         <el-select
           v-model="formData.cabinetId"
-          @change="onCabinetChange"
           clearable
           placeholder="请选择"
+          @change="onCabinetChange"
         >
           <el-option
             v-for="item in cabinetList"
@@ -64,8 +64,8 @@
         <el-select v-model="formData.gridNo" clearable placeholder="请选择">
           <el-option
             v-for="item in gridList"
-            :disabled="item.disabled"
             :key="item.gridNo"
+            :disabled="item.disabled"
             :label="item.gridNo"
             :value="item.gridNo"
           />
@@ -87,14 +87,6 @@ export default {
     sling: {
       type: Object, default: null
     }
-  },
-  computed: {
-    ...mapGetters('sling', {
-      slingTypes: 'slingTypes',
-      slingTons: 'slingTons',
-      slingUseStatus: 'slingUseStatus',
-      slingInspectStatus: 'slingInspectStatus',
-    })
   },
   data() {
     return {
@@ -125,9 +117,17 @@ export default {
       gridList: []
     }
   },
+  computed: {
+    ...mapGetters('sling', {
+      slingTypes: 'slingTypes',
+      slingTons: 'slingTons',
+      slingUseStatus: 'slingUseStatus',
+      slingInspectStatus: 'slingInspectStatus'
+    })
+  },
   watch: {
     sling: {
-      handler: function (newVal, oldVal) {
+      handler: function(newVal, oldVal) {
         if (newVal) {
           this.formData = {
             rfId: newVal.rfId,

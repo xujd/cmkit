@@ -10,7 +10,7 @@
         :min="1"
         :max="100"
         :precision="0"
-      ></el-input-number>
+      />
     </el-form-item>
     <el-form-item label="所在位置">
       <el-input v-model="formData.location" autocomplete="off" />
@@ -59,7 +59,7 @@ export default {
   },
   watch: {
     cabinet: {
-      handler: function (newVal, oldVal) {
+      handler: function(newVal, oldVal) {
         if (newVal) {
           this.formData = {
             name: newVal.name,

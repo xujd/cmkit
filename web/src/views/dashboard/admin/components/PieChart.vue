@@ -65,7 +65,7 @@ export default {
             center: ['50%', '38%'],
             data: _.map(data, item => { return { value: item.resCount, name: item.tonType } }),
             animationEasing: 'cubicInOut',
-            animationDuration: 2600
+            animationDuration: 1000
           }
         ]
       })

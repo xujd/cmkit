@@ -44,7 +44,7 @@ export default {
   },
   watch: {
     useLog: {
-      handler: function (newVal, oldVal) {
+      handler: function(newVal, oldVal) {
         if (newVal) {
           this.formData = {
             resId: newVal.resId,

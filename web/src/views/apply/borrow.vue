@@ -129,7 +129,7 @@ export default {
       slingTypes: 'slingTypes',
       slingTons: 'slingTons',
       slingUseStatus: 'slingUseStatus',
-      slingInspectStatus: 'slingInspectStatus',
+      slingInspectStatus: 'slingInspectStatus'
     })
   },
   mounted() {

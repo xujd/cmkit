@@ -34,7 +34,7 @@
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-            ></el-date-picker>
+            />
           </el-form-item>
           <el-form-item label="归还状态">
             <el-select v-model="formData.returnFlag" filterable clearable placeholder="请选择">
@@ -79,13 +79,10 @@
 <script>
 import * as applyApi from '@/api/apply'
 import { queryStaffs } from '@/api/staff'
-import ReturnNew from './components/ReturnNew'
-import * as _ from 'lodash'
 import dayjs from 'dayjs'
 export default {
   name: 'Return',
   components: {
-    ReturnNew
   },
   data() {
     return {
@@ -94,7 +91,7 @@ export default {
         takeStaffId: null,
         returnStaffId: null,
         takeTimes: [],
-        returnFlag: 0,
+        returnFlag: 0
       },
       tableData: [],
       dataTotal: 0,
@@ -136,11 +133,11 @@ export default {
       this.isReturnVisible = true
     },
     formatDuring(mss) {
-      var days = parseInt(mss / (1000 * 60 * 60 * 24));
-      var hours = parseInt((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      var minutes = parseInt((mss % (1000 * 60 * 60)) / (1000 * 60));
-      var seconds = (mss % (1000 * 60)) / 1000;
-      return days + " 天 " + hours + " 小时 " + minutes + " 分钟 " + seconds + " 秒 ";
+      var days = parseInt(mss / (1000 * 60 * 60 * 24))
+      var hours = parseInt((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      var minutes = parseInt((mss % (1000 * 60 * 60)) / (1000 * 60))
+      var seconds = (mss % (1000 * 60)) / 1000
+      return days + ' 天 ' + hours + ' 小时 ' + minutes + ' 分钟 ' + seconds + ' 秒 '
     },
     queryUseLogs() {
       const query = {

@@ -29,7 +29,6 @@
 
 <script>
 import PanelGroup from './components/PanelGroup'
-import RaddarChart from './components/RaddarChart'
 import PieChart from './components/PieChart'
 import BarChart from './components/BarChart'
 import TodoList from './components/TodoList'
@@ -39,7 +38,6 @@ export default {
   name: 'DashboardAdmin',
   components: {
     PanelGroup,
-    RaddarChart,
     PieChart,
     BarChart,
     TodoList,

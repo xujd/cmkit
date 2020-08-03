@@ -52,24 +52,24 @@ import CountTo from 'vue-count-to'
 import { getResStat } from '@/api/home'
 export default {
   components: {
-    CountTo 
+    CountTo
   },
-  data(){
+  data() {
     return {
       slingCount: 0,
       cabinetCount: 0
     }
   },
+  mounted() {
+    getResStat().then(d => {
+      this.slingCount = d.data.find(item => item.resType === 'sling').resCount
+      this.cabinetCount = d.data.find(item => item.resType === 'cabinet').resCount
+    })
+  },
   methods: {
     onItemClick(type) {
       this.$emit('itemClick', type)
     }
-  },
-  mounted() {
-    getResStat().then(d => {
-      this.slingCount = d.data.find(item=>item.resType === 'sling').resCount
-      this.cabinetCount = d.data.find(item=>item.resType === 'cabinet').resCount
-    })
   }
 }
 </script>

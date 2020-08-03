@@ -126,17 +126,17 @@ export default {
       curPageSize: 10
     }
   },
-  mounted() {
-    this.initDict().then(d => {
-      this.querySlings()
-    })
-  },
   computed: {
     ...mapGetters('sling', {
       slingTypes: 'slingTypes',
       slingTons: 'slingTons',
       slingUseStatus: 'slingUseStatus',
       slingInspectStatus: 'slingInspectStatus'
+    })
+  },
+  mounted() {
+    this.initDict().then(d => {
+      this.querySlings()
     })
   },
   methods: {

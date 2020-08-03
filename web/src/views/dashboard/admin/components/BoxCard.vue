@@ -4,8 +4,8 @@
       <span>吊索具状态统计</span>
     </div>
     <div style="position:relative;">
-      <div class="progress-item" v-for="item of statList" :key="item.name">
-        <span>{{item.name}}：{{item.count}}</span>
+      <div v-for="item of statList" :key="item.name" class="progress-item">
+        <span>{{ item.name }}：{{ item.count }}</span>
         <el-progress :percentage="item.percentage" />
       </div>
     </div>

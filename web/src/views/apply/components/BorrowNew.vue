@@ -71,7 +71,7 @@ export default {
   },
   watch: {
     sling: {
-      handler: function (newVal, oldVal) {
+      handler: function(newVal, oldVal) {
         if (newVal) {
           this.formData = {
             rfId: newVal.rfId,

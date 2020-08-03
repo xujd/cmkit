@@ -36,6 +36,7 @@
 </template>
 <script>
 import * as staffApi from '@/api/staff'
+import * as _ from 'lodash'
 export default {
   name: 'UserNew',
   props: {
