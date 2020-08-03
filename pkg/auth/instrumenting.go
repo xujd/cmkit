@@ -112,3 +112,103 @@ func (s InstrumentingMiddleware) Logout(token string) (result string, err error)
 
 	return s.Service.Logout(token)
 }
+
+// AddRole 添加角色
+func (s InstrumentingMiddleware) AddRole(role models.Role) (result string, err error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "AddRole").Add(1)
+		s.requestLatency.With("method", "AddRole").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.AddRole(role)
+}
+
+// UpdateRole 修改角色
+func (s InstrumentingMiddleware) UpdateRole(role models.Role) (result string, err error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "UpdateRole").Add(1)
+		s.requestLatency.With("method", "UpdateRole").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.UpdateRole(role)
+}
+
+// DeleteRole 删除角色
+func (s InstrumentingMiddleware) DeleteRole(id uint) (string, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "DeleteRole").Add(1)
+		s.requestLatency.With("method", "DeleteRole").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.DeleteRole(id)
+}
+
+// ListRoles 查询角色列表
+func (s InstrumentingMiddleware) ListRoles(name string, pageIndex int, pageSize int) (*models.SearchResult, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "ListRoles").Add(1)
+		s.requestLatency.With("method", "ListRoles").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.ListRoles(name, pageIndex, pageSize)
+}
+
+// SetUserRole 设置用户角色
+func (s InstrumentingMiddleware) SetUserRole(userID uint, roleIDs []uint) (string, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "SetUserRole").Add(1)
+		s.requestLatency.With("method", "SetUserRole").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.SetUserRole(userID, roleIDs)
+}
+
+// GetUserRole 获取用户角色
+func (s InstrumentingMiddleware) GetUserRole(userID uint) (*[]models.UserRoleRelation, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "GetUserRole").Add(1)
+		s.requestLatency.With("method", "GetUserRole").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.GetUserRole(userID)
+}
+
+// SetRoleFuncs 设置角色权限
+func (s InstrumentingMiddleware) SetRoleFuncs(roleFunc models.RoleFunc) (string, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "SetRoleFuncs").Add(1)
+		s.requestLatency.With("method", "SetRoleFuncs").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.SetRoleFuncs(roleFunc)
+}
+
+// GetRoleFuncs 获取角色权限
+func (s InstrumentingMiddleware) GetRoleFuncs(roleID uint) (*models.RoleFunc, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "GetRoleFuncs").Add(1)
+		s.requestLatency.With("method", "GetRoleFuncs").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.GetRoleFuncs(roleID)
+}
+
+// ResetPassword 重置密码
+func (s InstrumentingMiddleware) ResetPassword(userID uint) (string, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "ResetPassword").Add(1)
+		s.requestLatency.With("method", "ResetPassword").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.ResetPassword(userID)
+}
+
+// UpdatePassword 修改密码
+func (s InstrumentingMiddleware) UpdatePassword(userID uint, password string, newPassword string) (string, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "UpdatePassword").Add(1)
+		s.requestLatency.With("method", "UpdatePassword").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.UpdatePassword(userID, password, newPassword)
+}

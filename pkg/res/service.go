@@ -60,19 +60,19 @@ func (s ResService) ListSlings(name string, slingType uint, maxTonnage uint, use
 		Joins("LEFT JOIN (SELECT t_res_use_log.res_id, COUNT(0) AS use_count FROM t_res_use_log GROUP BY t_res_use_log.res_id) t1 ON t1.res_id = t_res_sling.id").
 		Where("t_res_sling.deleted_at IS NULL")
 	if name != "" {
-		slingdb = slingdb.Where("name LIKE ?", "%"+name+"%")
+		slingdb = slingdb.Where("t_res_sling.name LIKE ?", "%"+name+"%")
 	}
 	if slingType > 0 {
-		slingdb = slingdb.Where("sling_type = ?", slingType)
+		slingdb = slingdb.Where("t_res_sling.sling_type = ?", slingType)
 	}
 	if maxTonnage > 0 {
-		slingdb = slingdb.Where("max_tonnage = ?", maxTonnage)
+		slingdb = slingdb.Where("t_res_sling.max_tonnage = ?", maxTonnage)
 	}
 	if useStatus > 0 {
-		slingdb = slingdb.Where("use_status = ?", useStatus)
+		slingdb = slingdb.Where("t_res_sling.use_status = ?", useStatus)
 	}
 	if inspectStatus > 0 {
-		slingdb = slingdb.Where("inspect_status = ?", inspectStatus)
+		slingdb = slingdb.Where("t_res_sling.inspect_status = ?", inspectStatus)
 	}
 	if pageIndex == 0 {
 		pageIndex = 1
@@ -209,7 +209,7 @@ func (s ResService) ListCabinets(name string, pageIndex int, pageSize int) (*mod
 		Joins("LEFT JOIN (SELECT t_res_cabinet_grid.cabinet_id, COUNT(0) AS used_count FROM t_res_cabinet_grid WHERE t_res_cabinet_grid.in_res_id > 0 AND t_res_cabinet_grid.deleted_at IS NULL GROUP BY cabinet_id) t1 ON t1.cabinet_id = t_res_cabinet.id").
 		Where("t_res_cabinet.deleted_at IS NULL")
 	if name != "" {
-		cabinetdb = cabinetdb.Where("name LIKE ?", "%"+name+"%")
+		cabinetdb = cabinetdb.Where("t_res_cabinet.name LIKE ?", "%"+name+"%")
 	}
 	if pageIndex == 0 {
 		pageIndex = 1
