@@ -168,7 +168,7 @@ export default {
   },
   mounted() {
     queryCabinets('', 1000, 1).then(d => {
-      this.cabinetList = d.data.list
+      this.cabinetList = d.data.list.filter(item => item.status === 0)
     })
   },
   methods: {

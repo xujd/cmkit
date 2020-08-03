@@ -100,12 +100,21 @@ func (s AuthService) UpdateUser(user models.User) (string, error) {
 			return "", err
 		}
 	}
+	// 用户名不能为空
+	if user.Name == "" {
+		return "", utils.ErrUserNameIsNull
+	}
+	// 员工未指定
+	if user.StaffID == 0 {
+		return "", utils.ErrUserStaffIsNull
+	}
 	user0, _ := s.QueryUserByName(user.Name)
 	if user0 != nil && user0.ID != user.ID {
 		return "", utils.ErrUserAlreadyExists
 	}
 	data := map[string]interface{}{
-		"Remark": user.Remark,
+		"Remark":  user.Remark,
+		"StaffID": user.StaffID,
 	}
 	if user.StartTime != nil {
 		data["StartTime"] = user.StartTime

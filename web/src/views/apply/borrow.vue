@@ -65,8 +65,22 @@
         <el-table-column prop="slingTypeStr" label="型号" width="80" />
         <el-table-column prop="maxTonnageStr" label="最大吨位" width="100" />
         <el-table-column prop="useCount" label="使用次数" width="100" />
-        <el-table-column prop="useStatusStr" label="使用状态" width="100" />
-        <el-table-column prop="inspectStatusStr" label="点检状态" width="100" />
+        <el-table-column label="使用状态" width="100">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.useStatus === 1 ? 'success' : 'warning'"
+              disable-transitions
+            >{{ scope.row.useStatusStr }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="inspectStatusStr" label="点检状态" width="100">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.inspectStatus === 1 ? 'success' : 'danger'"
+              disable-transitions
+            >{{ scope.row.inspectStatusStr }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="putTime" label="投用日期" width="180" />
         <el-table-column prop="location" label="存放位置" width="160" />
         <el-table-column prop="usePermission" label="领用权限" width="180" />

@@ -101,7 +101,7 @@ export default {
       d.data.list.forEach(item => {
         item.label = `${item.id}|${item.name}`
       })
-      this.staffList = d.data.list
+      this.staffList = d.data.list.filter(item => item.status === 0)
     })
   },
   methods: {

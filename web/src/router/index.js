@@ -272,7 +272,7 @@ export const asyncRoutes = [
         component: () => import('@/views/auth/group'),
         name: 'GRoup',
         meta: {
-          title: '小组管理', noCache: true
+          title: '分组管理', noCache: true
           // roles: ['admin']
         }
       }

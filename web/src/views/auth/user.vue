@@ -20,7 +20,14 @@
         <el-table-column prop="staffName" width="120" label="员工姓名" />
         <el-table-column prop="startTimeStr" width="180" label="生效开始时间" />
         <el-table-column prop="endTimeStr" width="180" label="生效结束时间" />
-        <el-table-column prop="statusStr" width="80" label="状态" />
+        <el-table-column prop="statusStr" label="状态" width="80">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.status === 0 ? 'success' : 'danger'"
+              disable-transitions
+            >{{ scope.row.statusStr }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="remark" width="250" label="备注" />
         <el-table-column fixed="right" label="操作" width="160">
           <template slot-scope="scope">

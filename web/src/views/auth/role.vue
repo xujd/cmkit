@@ -17,7 +17,14 @@
       <el-table height="300" :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="编号" />
         <el-table-column prop="name" label="角色名称" />
-        <el-table-column prop="statusStr" label="状态" />
+        <el-table-column prop="statusStr" label="状态" width="80">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.status === 0 ? 'success' : 'danger'"
+              disable-transitions
+            >{{ scope.row.statusStr }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="remark" label="备注" />
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
