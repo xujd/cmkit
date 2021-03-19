@@ -5,8 +5,11 @@ export function takeSling(id, info) {
   const data = {
     resId: id,
     flag: 1,
+    rfId: info.rfId,
+    resName: info.name,
     takeStaffId: info.staffId,
-    takeTime: info.startTime,
+    takeStaffName: info.staffName,
+    // takeTime: info.startTime,
     returnPlanTime: info.returnTime,
     remark: info.remark
   }
@@ -24,6 +27,7 @@ export function returnSling(info) {
     resId: info.resId,
     flag: 0,
     returnStaffId: info.staffId,
+    returnStaffName: info.staffName,
     returnTime: info.returnTime,
     remark: info.remark
   }

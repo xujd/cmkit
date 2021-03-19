@@ -57,7 +57,8 @@
         <el-table-column prop="id" label="序号" width="80" />
         <el-table-column prop="resName" label="吊索具名称" width="120" />
         <el-table-column prop="takeStaffName" label="借用人员" width="80" />
-        <el-table-column prop="takeTime" label="借用时间" width="180" />
+        <el-table-column prop="createAt" label="借用时间" width="180" />
+        <el-table-column prop="takeTime" label="出柜时间" width="180" />
         <el-table-column prop="returnPlanTime" label="预计归还时间" width="180" />
         <el-table-column prop="returnStaffName" label="归还人员" width="100" />
         <el-table-column prop="returnTime" label="归还时间" width="180" />
@@ -146,14 +147,14 @@ export default {
         takeStaff: this.formData.takeStaffId,
         returnStaff: this.formData.returnStaffId
       }
-      if (this.formData.takeTimes.length === 2) {
+      if (this.formData.takeTimes && this.formData.takeTimes.length === 2) {
         query['takeStartTime'] = this.formData.takeTimes[0]
         query['takeEndTime'] = this.formData.takeTimes[1]
       }
       applyApi.getResUseLogs(query, this.curPageSize, this.curPageIndex).then(d => {
         d.data.list.forEach(item => {
           if (item.returnTime) {
-            let dur = dayjs(item.returnTime).diff(dayjs(item.takeTime))
+            let dur = dayjs(item.returnTime).diff(dayjs(item.createAt))
             if (dur < 0) {
               dur = 0
             }

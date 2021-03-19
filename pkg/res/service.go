@@ -466,7 +466,7 @@ func (s ResService) SaveTakeReturnLog(useLog UseLog) (string, error) {
 			Scan(&log).Error; err != nil {
 			return "", err
 		}
-		if err := s.DB.Model(&log).Updates(map[string]interface{}{"return_staff_id": useLog.ReturnStaffID, "return_time": useLog.ReturnTime, "remark": useLog.Remark}).Error; err != nil {
+		if err := s.DB.Model(&log).Updates(map[string]interface{}{"return_staff_id": useLog.ReturnStaffID, "return_staff_name": useLog.ReturnStaffName, "return_time": useLog.ReturnTime, "remark": useLog.Remark}).Error; err != nil {
 			return "", err
 		}
 	}
@@ -482,13 +482,14 @@ func (s ResService) GetTakeReturnLog(resName string, takeStaff uint, returnStaff
 		return nil, utils.ErrNotFound
 	}
 	logdb := s.DB.Table("t_res_use_log").
-		Select("t_res_use_log.*, t_res_sling.name AS res_name, t1.name AS take_staff_name, t2.name AS return_staff_name").
-		Joins("LEFT JOIN t_res_sling ON t_res_use_log.res_id = t_res_sling.id").
-		Joins("LEFT JOIN t_sys_staff AS t1 ON t_res_use_log.take_staff_id = t1.id").
-		Joins("LEFT JOIN t_sys_staff AS t2 ON t_res_use_log.return_staff_id = t2.id").
+		Select("t_res_use_log.*").
+		// Select("t_res_use_log.*, t_res_sling.name AS res_name, t1.name AS take_staff_name, t2.name AS return_staff_name").
+		// Joins("LEFT JOIN t_res_sling ON t_res_use_log.res_id = t_res_sling.id").
+		// Joins("LEFT JOIN t_sys_staff AS t1 ON t_res_use_log.take_staff_id = t1.id").
+		// Joins("LEFT JOIN t_sys_staff AS t2 ON t_res_use_log.return_staff_id = t2.id").
 		Order("t_res_use_log.created_at desc")
 	if resName != "" {
-		logdb = logdb.Where("t_res_sling.name LIKE ?", "%"+resName+"%")
+		logdb = logdb.Where("t_res_use_log.res_name LIKE ?", "%"+resName+"%")
 	}
 	if takeStaff > 0 {
 		logdb = logdb.Where("t_res_use_log.take_staff_id = ?", takeStaff)
@@ -497,10 +498,10 @@ func (s ResService) GetTakeReturnLog(resName string, takeStaff uint, returnStaff
 		logdb = logdb.Where("t_res_use_log.return_staff_id = ?", returnStaff)
 	}
 	if takeStartTime != "" {
-		logdb = logdb.Where("t_res_use_log.take_time >= ?", takeStartTime)
+		logdb = logdb.Where("t_res_use_log.created_at >= ?", takeStartTime)
 	}
 	if takeEndTime != "" {
-		logdb = logdb.Where("t_res_use_log.take_time <= ?", takeEndTime)
+		logdb = logdb.Where("t_res_use_log.created_at <= ?", takeEndTime)
 	}
 	if returnFlag == 1 { // 已归还
 		logdb = logdb.Where("t_res_use_log.return_time IS NOT NULL")

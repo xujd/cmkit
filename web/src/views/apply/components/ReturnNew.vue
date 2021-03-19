@@ -87,6 +87,7 @@ export default {
       if (this.useLog && this.useLog.id > 0) {
         tempData.id = this.useLog.id
       }
+      tempData.staffName = _.find(this.staffList, { id: tempData.staffId }).name
       return tempData
     }
   }

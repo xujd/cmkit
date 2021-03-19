@@ -11,14 +11,14 @@
         <el-option v-for="item in staffList" :key="item.id" :label="item.label" :value="item.id" />
       </el-select>
     </el-form-item>
-    <el-form-item label="借用时间" prop="startTime" required>
+    <!-- <el-form-item label="借用时间" prop="startTime" required>
       <el-date-picker
         v-model="formData.startTime"
         :value-format="'yyyy-MM-dd HH:mm:ss'"
         type="datetime"
         placeholder="选择时间"
       />
-    </el-form-item>
+    </el-form-item> -->
     <el-form-item label="预计归还时间" prop="returnTime" required>
       <el-date-picker
         v-model="formData.returnTime"
@@ -56,9 +56,9 @@ export default {
         staffId: [
           { required: true, message: '请输入选择借用人员', trigger: 'change' }
         ],
-        startTime: [
-          { required: true, message: '请输入选择借用时间', trigger: 'blur' }
-        ],
+        // startTime: [
+        //   { required: true, message: '请输入选择借用时间', trigger: 'blur' }
+        // ],
         returnTime: [
           { required: true, message: '请输入选择归还时间', trigger: 'blur' }
         ],
@@ -119,6 +119,7 @@ export default {
       if (this.sling && this.sling.id) {
         tempData.resId = this.sling.id
       }
+      tempData.staffName = _.find(this.staffList, { id: tempData.staffId }).name
       return tempData
     }
   }
