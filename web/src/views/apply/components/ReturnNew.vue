@@ -3,7 +3,7 @@
     <el-form-item label="吊索具名称">
       <el-input v-model="formData.resName" disabled autocomplete="off" />
     </el-form-item>
-    <el-form-item label="归还人" prop="staffId" required>
+    <el-form-item label="归还人员" prop="staffId" required>
       <el-select v-model="formData.staffId" clearable placeholder="请选择">
         <el-option v-for="item in staffList" :key="item.id" :label="item.label" :value="item.id" />
       </el-select>
@@ -33,7 +33,7 @@ export default {
       },
       rules: {
         staffId: [
-          { required: true, message: '请输入选择归还人', trigger: 'change' }
+          { required: true, message: '请输入选择归还人员', trigger: 'change' }
         ],
         remark: [
           { required: true, message: '请输入用途说明', trigger: 'blur' }

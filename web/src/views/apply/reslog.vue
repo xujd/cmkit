@@ -56,10 +56,10 @@
       <el-table height="300" :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="序号" width="80" />
         <el-table-column prop="resName" label="吊索具名称" width="120" />
-        <el-table-column prop="takeStaffName" label="借用人" width="80" />
+        <el-table-column prop="takeStaffName" label="借用人员" width="80" />
         <el-table-column prop="takeTime" label="借用时间" width="180" />
         <el-table-column prop="returnPlanTime" label="预计归还时间" width="180" />
-        <el-table-column prop="returnStaffName" label="归还人" width="100" />
+        <el-table-column prop="returnStaffName" label="归还人员" width="100" />
         <el-table-column prop="returnTime" label="归还时间" width="180" />
         <el-table-column prop="duration" label="使用时长" width="180" />
         <el-table-column prop="remark" label="用途说明" width="180" />

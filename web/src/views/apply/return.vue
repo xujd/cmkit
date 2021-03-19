@@ -6,7 +6,7 @@
           <el-form-item label="吊索具名称">
             <el-input v-model="formData.name" clearable placeholder="吊索具名称" />
           </el-form-item>
-          <el-form-item label="借用人">
+          <el-form-item label="借用人员">
             <el-select v-model="formData.staffId" filterable clearable placeholder="请选择">
               <el-option
                 v-for="item in staffList"
@@ -36,10 +36,10 @@
       <el-table height="300" :data="tableData" style="width: 100%">
         <el-table-column prop="id" label="序号" width="80" />
         <el-table-column prop="resName" label="吊索具名称" width="120" />
-        <el-table-column prop="takeStaffName" label="借用人" width="80" />
+        <el-table-column prop="takeStaffName" label="借用人员" width="80" />
         <el-table-column prop="takeTime" label="借用时间" width="180" />
         <el-table-column prop="returnPlanTime" label="预计归还时间" width="180" />
-        <el-table-column prop="returnStaffName" label="归还人" width="100" />
+        <el-table-column prop="returnStaffName" label="归还人员" width="100" />
         <el-table-column prop="returnTime" label="归还时间" width="180" />
         <el-table-column prop="remark" label="用途说明" width="180" />
         <el-table-column fixed="right" label="操作" width="100">
