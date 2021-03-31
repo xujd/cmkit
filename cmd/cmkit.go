@@ -56,7 +56,7 @@ func main() {
 	// database
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		*dbHost, *dbPort, *dbUser, *dbPasswd, *dbName)
-	logger.Log("database string", psqlInfo)
+	// logger.Log("database string", psqlInfo)
 	db, err := gorm.Open("postgres", psqlInfo)
 	if err != nil {
 		logger.Log("database error", err)
