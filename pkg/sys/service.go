@@ -3,7 +3,10 @@ package sys
 import (
 	"cmkit/pkg/models"
 	"cmkit/pkg/utils"
+	"fmt"
+	"io"
 	"math"
+	"os"
 
 	"github.com/jinzhu/gorm"
 )
@@ -28,7 +31,8 @@ type Service interface {
 
 // SysService 基础服务
 type SysService struct {
-	DB *gorm.DB
+	DB     *gorm.DB
+	WebDir string
 }
 
 // ListCompanys 查询公司
@@ -109,7 +113,45 @@ func (s SysService) AddStaff(staff models.Staff) (string, error) {
 	if err := s.DB.Create(&staff).Error; err != nil {
 		return "", err
 	}
+
+	// 员工的照片
+	srcFile := "./files/temp.png"
+	fileName := fmt.Sprintf("./files/%06d.png", staff.ID)
+	if fileExist(srcFile) {
+		os.Rename(srcFile, fileName)
+		copy(fileName, fmt.Sprintf("%s%06d.png", s.WebDir, staff.ID))
+	}
 	return "success", nil
+}
+
+func fileExist(path string) bool {
+	_, err := os.Lstat(path)
+	return !os.IsNotExist(err)
+}
+
+func copy(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
 }
 
 // UpdateStaff 修改员工

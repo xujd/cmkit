@@ -42,7 +42,7 @@
         <el-table-column prop="returnPlanTime" label="预计归还时间" width="180" />
         <!-- <el-table-column prop="returnStaffName" label="归还人员" width="100" />
         <el-table-column prop="returnTime" label="归还时间" width="180" /> -->
-        <el-table-column prop="remark" label="用途说明" width="180" />
+        <el-table-column prop="remark" label="用途说明" />
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
             <el-button type="text" size="small" @click="handleEditClick(scope.row)">归还</el-button>

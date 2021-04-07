@@ -84,7 +84,7 @@
         </el-table-column>
         <el-table-column prop="putTime" label="投用日期" width="180" />
         <el-table-column prop="location" label="存放位置" width="160" />
-        <el-table-column prop="usePermission" label="领用权限" width="180" />
+        <el-table-column prop="usePermission" label="领用权限" />
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
             <el-button type="text" size="small" @click="handleEditClick(scope.row)">编辑</el-button>

@@ -1,41 +1,106 @@
 <template>
-  <el-form :model="formData" :rules="rules" label-width="100px">
-    <el-form-item label="员工姓名" prop="name" required>
-      <el-input v-model="formData.name" autocomplete="off" />
-    </el-form-item>
-    <el-form-item label="所在公司">
-      <el-select v-model="formData.companyId" clearable placeholder="请选择" @change="onCompanyChange">
-        <el-option v-for="item in companys" :key="item.id" :label="item.name" :value="item.id" />
-      </el-select>
-    </el-form-item>
-    <el-form-item label="所在部门">
-      <el-select v-model="formData.departmentId" clearable placeholder="请选择">
-        <el-option v-for="item in departments" :key="item.id" :label="item.name" :value="item.id" />
-      </el-select>
-    </el-form-item>
-    <el-form-item label="出生日期">
-      <el-date-picker
-        v-model="formData.birthday"
-        :value-format="'yyyy-MM-dd'"
-        type="date"
-        placeholder="选择日期"
-      />
-    </el-form-item>
-    <el-form-item label="状态">
-      <el-select v-model="formData.status" clearable placeholder="请选择">
-        <el-option v-for="item in statusList" :key="item.id" :label="item.name" :value="item.id" />
-      </el-select>
-    </el-form-item>
-    <el-form-item label="备注">
-      <el-input v-model="formData.remark" type="textarea" :rows="2" placeholder="请输入" />
-    </el-form-item>
-  </el-form>
+  <div>
+    <el-form :model="formData" :rules="rules" label-width="100px">
+      <el-form-item label="员工姓名" prop="name" required>
+        <el-input
+          v-model="formData.name"
+          autocomplete="off"
+          style="width: 200px"
+        />
+      </el-form-item>
+      <el-form-item label="所在公司">
+        <el-select
+          v-model="formData.companyId"
+          style="width: 200px"
+          clearable
+          placeholder="请选择"
+          @change="onCompanyChange"
+        >
+          <el-option
+            v-for="item in companys"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="所在部门">
+        <el-select
+          v-model="formData.departmentId"
+          style="width: 200px"
+          clearable
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in departments"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="出生日期">
+        <el-date-picker
+          v-model="formData.birthday"
+          style="width: 200px"
+          :value-format="'yyyy-MM-dd'"
+          type="date"
+          placeholder="选择日期"
+        />
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-select
+          v-model="formData.status"
+          style="width: 200px"
+          clearable
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in statusList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="备注">
+        <el-input
+          v-model="formData.remark"
+          type="textarea"
+          :rows="2"
+          placeholder="请输入"
+        />
+      </el-form-item>
+    </el-form>
+    <img
+      :src="imageUrl"
+      class="person-img"
+      @error="errorLoadImg"
+      @click="imagecropperShow = true"
+    >
+    <image-cropper
+      v-show="imagecropperShow"
+      :key="imagecropperKey"
+      field="uploadfile"
+      :params="picParam"
+      :width="300"
+      :height="300"
+      url="/file/upload"
+      @close="close"
+      @crop-upload-success="cropSuccess"
+    />
+  </div>
 </template>
 <script>
 import * as sysApi from '@/api/sys'
 import _ from 'lodash'
+import ImageCropper from '@/components/ImageCropper'
+
 export default {
   name: 'StaffNew',
+  components: {
+    ImageCropper
+  },
   props: {
     staff: {
       type: Object, default: null
@@ -43,6 +108,13 @@ export default {
   },
   data() {
     return {
+      imagecropperShow: false,
+      imagecropperKey: 0,
+      imageUrl: 'assets/person.svg',
+      defaultImageUrl: 'assets/person.svg',
+      picParam: {
+        fileName: ''
+      },
       companys: [],
       departments: [],
       formData: {
@@ -77,6 +149,8 @@ export default {
             remark: newVal.remark,
             status: newVal.status
           }
+          this.picParam.fileName = newVal.id.toString().padStart(6, '0') + '.png'
+          this.imageUrl = 'assets/pictures/' + this.picParam.fileName
           sysApi.queryDepartments('', this.formData.companyId).then(d => {
             this.departments = d.data.list
           })
@@ -89,6 +163,8 @@ export default {
             remark: '',
             status: 0
           }
+          this.picParam.fileName = ''
+          this.imageUrl = this.defaultImageUrl
           this.departments = []
         }
       },
@@ -101,6 +177,17 @@ export default {
     })
   },
   methods: {
+    errorLoadImg() {
+      this.imageUrl = this.defaultImageUrl
+    },
+    cropSuccess(resData) {
+      this.imagecropperShow = false
+      this.imagecropperKey = this.imagecropperKey + 1
+      this.imageUrl = 'assets/pictures/' + resData.data.fileName
+    },
+    close() {
+      this.imagecropperShow = false
+    },
     onCompanyChange() {
       this.formData.departmentId = null
       if (!this.formData.companyId) {
@@ -142,4 +229,13 @@ export default {
 }
 </script>
 <style scoped>
+.person-img {
+  width: 180px;
+  height: 180px;
+  position: absolute;
+  right: 24px;
+  top: 84px;
+  border: 1px solid lightgray;
+  cursor: pointer;
+}
 </style>

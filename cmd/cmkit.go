@@ -1,8 +1,12 @@
 package main
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,10 +21,12 @@ import (
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 
 	"cmkit/pkg/auth"
+	"cmkit/pkg/fileupload"
 	"cmkit/pkg/hello"
 	"cmkit/pkg/home"
 	"cmkit/pkg/res"
 	"cmkit/pkg/sys"
+	"cmkit/pkg/utils"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -42,6 +48,7 @@ func main() {
 		dbUser      = flag.String("db.user", "postgres", "db user")
 		dbPasswd    = flag.String("db.passwd", "123456", "db password")
 		dbName      = flag.String("db.name", "cmkit", "db name")
+		webDir      = flag.String("web.dir", "../web/public/assets/pictures/", "web dir")
 	)
 	flag.Parse()
 
@@ -94,7 +101,8 @@ func main() {
 	// 系统基础
 	var sysSvc sys.Service
 	sysSvc = sys.SysService{
-		DB: db,
+		DB:     db,
+		WebDir: *webDir,
 	}
 
 	sysSvc = sys.NewLoggingMiddleware(log.With(logger, "component", "sys"), sysSvc)
@@ -110,6 +118,16 @@ func main() {
 	resSvc = res.NewLoggingMiddleware(log.With(logger, "component", "res"), resSvc)
 	resSvc = res.NewInstrumentingMiddleware(requestCount, requestLatency, resSvc)
 	resEndpoints := res.CreateEndpoints(resSvc)
+
+	// 文件上传
+	var fileuploadSvc fileupload.Service
+	fileuploadSvc = fileupload.FileUploadService{
+		WebDir: *webDir,
+	}
+
+	fileuploadSvc = fileupload.NewLoggingMiddleware(log.With(logger, "component", "fileupload"), fileuploadSvc)
+	fileuploadSvc = fileupload.NewInstrumentingMiddleware(requestCount, requestLatency, fileuploadSvc)
+	fileUploadEndpoints := fileupload.CreateEndpoints(fileuploadSvc)
 
 	// 首页
 	var homeSvc home.Service
@@ -139,6 +157,7 @@ func main() {
 	mux.Handle("/sys/", sys.MakeHandler(sysEndpoints, httpLogger))
 	mux.Handle("/res/", res.MakeHandler(resEndpoints, httpLogger))
 	mux.Handle("/home/", home.MakeHandler(homeEndpoints, httpLogger))
+	http.Handle("/file/", fileupload.MakeHandler(fileUploadEndpoints, httpLogger))
 	http.Handle("/", accessControl(mux))
 	http.Handle("/metrics", promhttp.Handler())
 
@@ -154,6 +173,43 @@ func main() {
 	}()
 
 	logger.Log("terminated", <-errs)
+}
+
+func upload(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			return
+		}
+
+		r.ParseMultipartForm(32 << 20) // max memory is set to 32MB
+		clientfd, handler, err := r.FormFile("uploadfile")
+		if err != nil {
+			fmt.Println(err)
+			msg, _ := json.Marshal(utils.CmkitResponse{Code: 40003, Success: false, Message: "upload failed."})
+			w.Write(msg)
+			return
+		}
+		defer clientfd.Close()
+		destLocalPath := "./files/"
+		localpath := fmt.Sprintf("%s%s", destLocalPath, handler.Filename)
+		localfd, err := os.OpenFile(localpath, os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			fmt.Println(err)
+			msg, _ := json.Marshal(utils.CmkitResponse{Code: 40003, Success: false, Message: "upload failed."})
+			w.Write(msg)
+			return
+		}
+		defer localfd.Close()
+
+		// 利用io.TeeReader在读取文件内容时计算hash值
+		fhash := sha1.New()
+		io.Copy(localfd, io.TeeReader(clientfd, fhash))
+		hstr := hex.EncodeToString(fhash.Sum(nil))
+		msg, _ := json.Marshal(utils.CmkitResponse{Code: 20000, Success: true, Message: "upload finish.", Data: hstr})
+		w.Write(msg)
+
+		h.ServeHTTP(w, r)
+	})
 }
 
 func accessControl(h http.Handler) http.Handler {

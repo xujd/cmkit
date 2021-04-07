@@ -30,7 +30,7 @@
             >{{ scope.row.statusStr }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注" width="120" />
+        <el-table-column prop="remark" label="备注" />
         <el-table-column fixed="right" label="操作" width="100">
           <template slot-scope="scope">
             <el-button type="text" size="small" @click="handleEditClick(scope.row)">编辑</el-button>

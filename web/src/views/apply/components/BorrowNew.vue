@@ -1,13 +1,13 @@
 <template>
   <el-form ref="form" :model="formData" :rules="rules" label-width="120px">
     <el-form-item label="RFID">
-      <el-input v-model="formData.rfId" disabled autocomplete="off" />
+      <el-input v-model="formData.rfId" style="width:200px;" disabled autocomplete="off" />
     </el-form-item>
     <el-form-item label="吊索具名称">
-      <el-input v-model="formData.name" disabled autocomplete="off" />
+      <el-input v-model="formData.name" style="width:200px;" disabled autocomplete="off" />
     </el-form-item>
     <el-form-item label="借用人员" prop="staffId" required>
-      <el-select v-model="formData.staffId" clearable placeholder="请选择">
+      <el-select v-model="formData.staffId" style="width:200px;" clearable placeholder="请选择">
         <el-option v-for="item in staffList" :key="item.id" :label="item.label" :value="item.id" />
       </el-select>
     </el-form-item>
@@ -25,6 +25,7 @@
         :value-format="'yyyy-MM-dd HH:mm:ss'"
         type="datetime"
         placeholder="选择时间"
+        style="width:200px;"
       />
     </el-form-item>
     <el-form-item label="用途说明" prop="remark" required>

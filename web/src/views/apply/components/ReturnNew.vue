@@ -1,10 +1,10 @@
 <template>
   <el-form ref="form" :model="formData" :rules="rules" label-width="120px">
     <el-form-item label="吊索具名称">
-      <el-input v-model="formData.resName" disabled autocomplete="off" />
+      <el-input v-model="formData.resName" style="width:200px;" disabled autocomplete="off" />
     </el-form-item>
     <el-form-item label="归还人员" prop="staffId" required>
-      <el-select v-model="formData.staffId" clearable placeholder="请选择">
+      <el-select v-model="formData.staffId" style="width:200px;" clearable placeholder="请选择">
         <el-option v-for="item in staffList" :key="item.id" :label="item.label" :value="item.id" />
       </el-select>
     </el-form-item>

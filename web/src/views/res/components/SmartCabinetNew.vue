@@ -1,7 +1,7 @@
 <template>
   <el-form :model="formData" :rules="rules" label-width="100px">
     <el-form-item label="智能柜名称" prop="name" required>
-      <el-input v-model="formData.name" autocomplete="off" />
+      <el-input v-model="formData.name" style="width: 200px" autocomplete="off" />
     </el-form-item>
     <el-form-item label="箱格数" prop="gridCount" required>
       <el-input-number
@@ -10,15 +10,16 @@
         :min="1"
         :max="100"
         :precision="0"
+        style="width: 200px"
       />
+    </el-form-item>
+    <el-form-item label="状态">
+      <el-select v-model="formData.status" style="width: 200px" clearable placeholder="请选择">
+        <el-option v-for="item in statusList" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
     </el-form-item>
     <el-form-item label="所在位置">
       <el-input v-model="formData.location" autocomplete="off" />
-    </el-form-item>
-    <el-form-item label="状态">
-      <el-select v-model="formData.status" clearable placeholder="请选择">
-        <el-option v-for="item in statusList" :key="item.id" :label="item.name" :value="item.id" />
-      </el-select>
     </el-form-item>
     <el-form-item label="备注">
       <el-input v-model="formData.remark" type="textarea" :rows="2" placeholder="请输入" />

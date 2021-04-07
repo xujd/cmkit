@@ -1,7 +1,7 @@
 <template>
   <div class="staff-conaitner">
     <el-card class="search-box">
-      <div style="position:relative;">
+      <div style="position: relative">
         <el-form :inline="true" :model="formData">
           <el-form-item label="员工姓名">
             <el-input v-model="formData.name" clearable placeholder="姓名" />
@@ -22,7 +22,11 @@
             </el-select>
           </el-form-item>
           <el-form-item label="所在部门">
-            <el-select v-model="formData.departmentId" clearable placeholder="请选择">
+            <el-select
+              v-model="formData.departmentId"
+              clearable
+              placeholder="请选择"
+            >
               <el-option
                 v-for="item in departments"
                 :key="item.id"
@@ -35,12 +39,22 @@
             <el-button type="primary" @click="onSubmit">查询</el-button>
           </el-form-item>
         </el-form>
-        <el-button type="success" style="position: absolute; right: 0; top: 0;" @click="onAddNew">新增</el-button>
+        <el-button
+          type="success"
+          style="position: absolute; right: 0; top: 0"
+          @click="onAddNew"
+        >新增</el-button>
       </div>
     </el-card>
     <el-card class="result-box">
       <el-table height="300" :data="tableData" style="width: 100%">
-        <el-table-column prop="id" label="编号" width="60" />
+        <el-table-column label="工号" width="80">
+          <template slot-scope="scope">
+            <span>{{
+              scope.row.id.toString().padStart(6, "0")
+            }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="员工姓名" width="100" />
         <el-table-column prop="companyName" label="所在公司" />
         <el-table-column prop="departmentName" label="所在部门" />
@@ -81,7 +95,12 @@
         @current-change="handleCurrentChange"
       />
     </el-card>
-    <el-dialog :title="staffNewTitle" :visible.sync="isAddStaffVisible" width="40%" top="10px">
+    <el-dialog
+      :title="staffNewTitle"
+      :visible.sync="isAddStaffVisible"
+      width="40%"
+      top="10px"
+    >
       <StaffNew v-if="isAddStaffVisible" ref="staffNew" :staff="curStaff" />
       <span slot="footer" class="dialog-footer">
         <el-button @click="isAddStaffVisible = false">取 消</el-button>

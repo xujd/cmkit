@@ -1,23 +1,23 @@
 <template>
   <el-form :model="formData" :rules="rules" label-width="100px">
     <el-form-item label="RFID" prop="rfId" required>
-      <el-input v-model="formData.rfId" autocomplete="off" />
+      <el-input v-model="formData.rfId" style="width: 200px" autocomplete="off" />
     </el-form-item>
     <el-form-item label="吊索具名称" prop="name" required>
-      <el-input v-model="formData.name" autocomplete="off" />
+      <el-input v-model="formData.name" style="width: 200px" autocomplete="off" />
     </el-form-item>
     <el-form-item label="型号">
-      <el-select v-model="formData.slingType" clearable placeholder="请选择">
+      <el-select v-model="formData.slingType" style="width: 200px" clearable placeholder="请选择">
         <el-option v-for="item in slingTypes" :key="item.key" :label="item.name" :value="item.key" />
       </el-select>
     </el-form-item>
     <el-form-item label="最大吨位">
-      <el-select v-model="formData.maxTonnage" clearable placeholder="请选择">
+      <el-select v-model="formData.maxTonnage" style="width: 200px" clearable placeholder="请选择">
         <el-option v-for="item in slingTons" :key="item.key" :label="item.name" :value="item.key" />
       </el-select>
     </el-form-item>
     <el-form-item label="使用状态">
-      <el-select v-model="formData.useStatus" clearable placeholder="请选择">
+      <el-select v-model="formData.useStatus" style="width: 200px" clearable placeholder="请选择">
         <el-option
           v-for="item in slingUseStatus"
           :key="item.key"
@@ -27,7 +27,7 @@
       </el-select>
     </el-form-item>
     <el-form-item label="点检状态">
-      <el-select v-model="formData.inspectStatus" clearable placeholder="请选择">
+      <el-select v-model="formData.inspectStatus" style="width: 200px" clearable placeholder="请选择">
         <el-option
           v-for="item in slingInspectStatus"
           :key="item.key"
@@ -41,6 +41,7 @@
         v-model="formData.putTime"
         :value-format="'yyyy-MM-dd HH:mm:ss'"
         type="datetime"
+        style="width: 200px"
         placeholder="选择日期"
       />
     </el-form-item>
