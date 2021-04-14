@@ -115,11 +115,14 @@ func (s SysService) AddStaff(staff models.Staff) (string, error) {
 	}
 
 	// 员工的照片
-	srcFile := "./files/temp.png"
-	fileName := fmt.Sprintf("./files/%06d.png", staff.ID)
+	srcFile := "./files/temp.jpg"
+	srcDefault := "./files/default.jpg"
+	fileName := fmt.Sprintf("./files/%06d.jpg", staff.ID)
 	if fileExist(srcFile) {
 		os.Rename(srcFile, fileName)
-		copy(fileName, fmt.Sprintf("%s%06d.png", s.WebDir, staff.ID))
+		copy(fileName, fmt.Sprintf("%s%06d.jpg", s.WebDir, staff.ID))
+		// 覆盖掉web目录的temp.jpg
+		copy(srcDefault, fmt.Sprintf("%stemp.jpg", s.WebDir))
 	}
 	return "success", nil
 }

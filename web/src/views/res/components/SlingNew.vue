@@ -45,12 +45,12 @@
         placeholder="选择日期"
       />
     </el-form-item>
-    <el-form-item label="存放位置" prop="gridNo" required>
+    <el-form-item label="存放位置" prop="gridNo">
       <el-col :span="12">
         <el-select
           v-model="formData.cabinetId"
-          clearable
-          placeholder="请选择"
+          disabled
+          placeholder="默认"
           @change="onCabinetChange"
         >
           <el-option
@@ -62,7 +62,7 @@
         </el-select>柜
       </el-col>
       <el-col :span="12">
-        <el-select v-model="formData.gridNo" clearable placeholder="请选择">
+        <el-select v-model="formData.gridNo" disabled placeholder="默认">
           <el-option
             v-for="item in gridList"
             :key="item.gridNo"
@@ -70,7 +70,7 @@
             :label="item.gridNo"
             :value="item.gridNo"
           />
-        </el-select>箱
+        </el-select>格
       </el-col>
     </el-form-item>
     <el-form-item label="领用权限">
@@ -109,10 +109,10 @@ export default {
         ],
         name: [
           { required: true, message: '请输入吊索具名称', trigger: 'blur' }
-        ],
-        gridNo: [
-          { required: true, message: '请选择存放位置', trigger: 'change' }
         ]
+        // gridNo: [
+        //   { required: true, message: '请选择存放位置', trigger: 'change' }
+        // ]
       },
       cabinetList: [],
       gridList: []
@@ -142,12 +142,14 @@ export default {
             cabinetId: newVal.cabinetId,
             gridNo: newVal.gridNo
           }
-          queryGrids(this.formData.cabinetId).then(d => {
-            d.data.list.forEach(item => {
-              item.disabled = item.inResId !== 0
+          if (this.formData.cabinetId > 0) {
+            queryGrids(this.formData.cabinetId).then(d => {
+              d.data.list.forEach(item => {
+                item.disabled = item.inResId !== 0
+              })
+              this.gridList = d.data.list
             })
-            this.gridList = d.data.list
-          })
+          }
         } else {
           this.formData = {
             rfId: '',

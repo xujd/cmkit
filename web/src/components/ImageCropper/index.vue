@@ -216,7 +216,7 @@ export default {
     // 图片上传格式
     imgFormat: {
       type: String,
-      default: 'png'
+      default: 'jpg'
     },
     // 是否支持跨域
     withCredentials: {
@@ -227,7 +227,7 @@ export default {
   data() {
     const { imgFormat, langType, langExt, width, height } = this
     let isSupported = true
-    const allowImgFormat = ['jpg', 'png']
+    const allowImgFormat = ['jpg']
     const tempImgFormat =
       allowImgFormat.indexOf(imgFormat) === -1 ? 'jpg' : imgFormat
     const lang = language[langType] ? language[langType] : language['en']
@@ -423,7 +423,7 @@ export default {
       // 延时是为了显示动画效果呢，哈哈哈
       setTimeout(() => {
         this.step = no
-      }, 200)
+      }, 100)
     },
     /* 图片选择区域函数绑定
      ---------------------------------------------------------------*/
@@ -456,6 +456,11 @@ export default {
     checkFile(file) {
       const { lang, maxSize } = this
       // 仅限图片
+      if (file.type.indexOf('jpeg') === -1 && file.type.indexOf('jpg') === -1) {
+        this.hasError = true
+        this.errorMsg = '仅限于jpg图片'
+        return false
+      }
       if (file.type.indexOf('image') === -1) {
         this.hasError = true
         this.errorMsg = lang.error.onlyImg
@@ -769,11 +774,12 @@ export default {
         ki,
         createImgUrl
       } = this
+
       const fmData = new FormData()
       fmData.append(
         field,
         data2blob(createImgUrl, mime),
-        field + '.' + imgFormat
+        field + '.jpg'
       )
       // 添加其他参数
       if (typeof params === 'object' && params) {

@@ -2,5 +2,7 @@
 go.sum
 node_modules
 /dist
+/cmd/files
 /cmd/nohup.out
 /cmd/cmkit
+/web/public/assets/pictures

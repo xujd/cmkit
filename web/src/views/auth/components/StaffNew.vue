@@ -149,7 +149,7 @@ export default {
             remark: newVal.remark,
             status: newVal.status
           }
-          this.picParam.fileName = newVal.id.toString().padStart(6, '0') + '.png'
+          this.picParam.fileName = newVal.id.toString().padStart(6, '0') + '.jpg'
           this.imageUrl = 'assets/pictures/' + this.picParam.fileName
           sysApi.queryDepartments('', this.formData.companyId).then(d => {
             this.departments = d.data.list

@@ -28,7 +28,7 @@ func (s FileUploadService) Upload(r *http.Request) (*FileData, error) {
 	}
 	defer clientfd.Close()
 	destLocalPath := "./files/"
-	fileName := "temp.png"
+	fileName := "temp.jpg"
 	if r.Form.Get("fileName") != "" {
 		fileName = r.Form.Get("fileName")
 	}

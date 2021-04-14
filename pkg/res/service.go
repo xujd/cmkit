@@ -108,9 +108,9 @@ func (s ResService) AddSling(sling Sling) (string, error) {
 		return "", utils.ErrSlingRfIDIsNull
 	}
 	// 存放位置为空
-	if sling.CabinetID == 0 || sling.GridNo == 0 {
-		return "", utils.ErrSlingCabinetIsNull
-	}
+	// if sling.CabinetID == 0 || sling.GridNo == 0 {
+	// 	return "", utils.ErrSlingCabinetIsNull
+	// }
 	// 名字或RFID重复
 	sling0, _ := s.QuerySlingByName(sling.Name, sling.RfID)
 	if sling0 != nil {
@@ -120,12 +120,12 @@ func (s ResService) AddSling(sling Sling) (string, error) {
 		return "", err
 	}
 	// 保存位置数据
-	sling1, _ := s.QuerySlingByName(sling.Name, sling.RfID)
-	_, err1 := s.Store(sling.CabinetID, sling.GridNo, sling1.ID)
-	if err1 != nil { // 失败删除
-		s.DB.Unscoped().Where("id = ?", sling1.ID).Delete(&Sling{})
-		return "", err1
-	}
+	// sling1, _ := s.QuerySlingByName(sling.Name, sling.RfID)
+	// _, err1 := s.Store(sling.CabinetID, sling.GridNo, sling1.ID)
+	// if err1 != nil { // 失败删除
+	// 	s.DB.Unscoped().Where("id = ?", sling1.ID).Delete(&Sling{})
+	// 	return "", err1
+	// }
 	return "success", nil
 }
 
@@ -158,9 +158,9 @@ func (s ResService) UpdateSling(sling Sling) (string, error) {
 		return "", utils.ErrSlingNameIsNull
 	}
 	// 存放位置为空
-	if sling.CabinetID == 0 || sling.GridNo == 0 {
-		return "", utils.ErrSlingCabinetIsNull
-	}
+	// if sling.CabinetID == 0 || sling.GridNo == 0 {
+	// 	return "", utils.ErrSlingCabinetIsNull
+	// }
 	// 名字或RFID重复
 	sling0, _ := s.QuerySlingByName(sling.Name, sling.RfID)
 	if sling0 != nil && sling0.ID != sling.ID {
@@ -173,11 +173,11 @@ func (s ResService) UpdateSling(sling Sling) (string, error) {
 		return "", err
 	}
 	// 保存位置数据
-	_, err1 := s.Store(sling.CabinetID, sling.GridNo, sling.ID)
-	if err1 != nil {
-		tx.Rollback()
-		return "", err1
-	}
+	// _, err1 := s.Store(sling.CabinetID, sling.GridNo, sling.ID)
+	// if err1 != nil {
+	// 	tx.Rollback()
+	// 	return "", err1
+	// }
 	tx.Commit()
 	return "success", nil
 }
