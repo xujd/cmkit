@@ -1,4 +1,6 @@
 *.exe
+*.zip
+*.7z
 go.sum
 node_modules
 /dist
