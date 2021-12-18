@@ -1,5 +1,6 @@
 *.exe
 go.sum
+/cmd/log.txt
 node_modules
 /dist
 /cmd/files

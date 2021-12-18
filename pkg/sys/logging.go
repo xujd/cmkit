@@ -117,3 +117,45 @@ func (mw LoggingMiddleware) ListDict(scene string, dictType string) (result *[]m
 	result, err = mw.Service.ListDict(scene, dictType)
 	return
 }
+
+// AddDict 添加字典
+func (mw LoggingMiddleware) AddDict(dict models.DictData) (result string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "AddDict",
+			"input", fmt.Sprintf("dict=%+v", dict),
+			"result", result,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.AddDict(dict)
+	return
+}
+
+// UpdateDict 修改字典
+func (mw LoggingMiddleware) UpdateDict(dict models.DictData) (result string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "UpdateDict",
+			"input", fmt.Sprintf("dict=%+v", dict),
+			"result", result,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.UpdateDict(dict)
+	return
+}
+
+// DeleteDict 删除字典
+func (mw LoggingMiddleware) DeleteDict(id uint) (result string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"function", "DeleteDict",
+			"input", fmt.Sprintf("id=%d", id),
+			"result", result,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	result, err = mw.Service.DeleteDict(id)
+	return
+}

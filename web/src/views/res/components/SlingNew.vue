@@ -4,7 +4,7 @@
       <el-input v-model="formData.rfId" style="width: 200px" autocomplete="off" />
     </el-form-item>
     <el-form-item label="吊索具名称" prop="name" required>
-      <el-input v-model="formData.name" style="width: 200px" autocomplete="off" />
+      <el-input v-model="formData.name" :maxlength="128" style="width: 200px" autocomplete="off" />
     </el-form-item>
     <el-form-item label="型号">
       <el-select v-model="formData.slingType" style="width: 200px" clearable placeholder="请选择">

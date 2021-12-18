@@ -93,6 +93,34 @@ func MakeHandler(endpoints SysEndpoints, logger kitlog.Logger) http.Handler {
 	)
 
 	r.Handle("/sys/dict", listDictDataHandler).Methods("GET")
+	// 添加字典
+	addDictHandler := kithttp.NewServer(
+		endpoints.AddDictDataEndpoint,
+		decodeAddDictRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/sys/dict", addDictHandler).Methods("POST")
+	// 修改字典
+	updateDitHandler := kithttp.NewServer(
+		endpoints.UpdateDictDataEndpoint,
+		decodeUpdateDictRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/sys/dict", updateDitHandler).Methods("PUT")
+
+	// 删除字典
+	deleteDictHandler := kithttp.NewServer(
+		endpoints.DeleteDictDataEndpoint,
+		utils.DecodeDataIDRequest,
+		utils.EncodeResponse,
+		append(opts, kithttp.ServerBefore(kitjwt.HTTPToContext()))...,
+	)
+
+	r.Handle("/sys/dict/{id}", deleteDictHandler).Methods("DELETE")
 
 	return r
 }
@@ -188,4 +216,20 @@ func decodeDictDataSearchRequest(_ context.Context, r *http.Request) (interface{
 	dictType := vars.Get("type")
 
 	return map[string]interface{}{"scene": scene, "dictType": dictType}, nil
+}
+
+func decodeAddDictRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var dict models.DictData
+	if err := json.NewDecoder(r.Body).Decode(&dict); err != nil {
+		return nil, err
+	}
+	return dict, nil
+}
+
+func decodeUpdateDictRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var dict models.DictData
+	if err := json.NewDecoder(r.Body).Decode(&dict); err != nil {
+		return nil, err
+	}
+	return dict, nil
 }

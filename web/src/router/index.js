@@ -275,6 +275,15 @@ export const asyncRoutes = [
           title: '分组管理', noCache: true
           // roles: ['admin']
         }
+      },
+      {
+        path: 'dict',
+        component: () => import('@/views/sys/dict'),
+        name: 'DICT',
+        meta: {
+          title: '字典管理', noCache: true
+          // roles: ['admin']
+        }
       }
     ]
   },

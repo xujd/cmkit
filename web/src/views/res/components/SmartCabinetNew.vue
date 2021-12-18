@@ -1,7 +1,7 @@
 <template>
   <el-form :model="formData" :rules="rules" label-width="100px">
     <el-form-item label="智能柜名称" prop="name" required>
-      <el-input v-model="formData.name" style="width: 200px" autocomplete="off" />
+      <el-input v-model="formData.name" :maxlength="128" style="width: 200px" autocomplete="off" />
     </el-form-item>
     <el-form-item label="箱格数" prop="gridCount" required>
       <el-input-number

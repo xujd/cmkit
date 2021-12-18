@@ -19,6 +19,9 @@ type SysEndpoints struct {
 	DeleteStaffEndpoint     endpoint.Endpoint
 	ListStaffsEndpoint      endpoint.Endpoint
 	ListDictDataEndpoint    endpoint.Endpoint
+	AddDictDataEndpoint     endpoint.Endpoint
+	UpdateDictDataEndpoint  endpoint.Endpoint
+	DeleteDictDataEndpoint  endpoint.Endpoint
 }
 
 // CreateEndpoints 创建SysEndpoints
@@ -37,6 +40,12 @@ func CreateEndpoints(svc Service) SysEndpoints {
 	listStaffsEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(listStaffsEndpoint)
 	listDictDataEndpoint := MakeListDictDataEndpoint(svc)
 	listDictDataEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(listDictDataEndpoint)
+	addDictDataEndpoint := MakeAddDictEndpoint(svc)
+	addDictDataEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(addDictDataEndpoint)
+	updateDictDataEndpoint := MakeUpdateDictEndpoint(svc)
+	updateDictDataEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(updateDictDataEndpoint)
+	deleteDictDataEndpoint := MakeDeleteDictEndpoint(svc)
+	deleteDictDataEndpoint = kitjwt.NewParser(auth.JwtKeyFunc, jwt.SigningMethodHS256, kitjwt.StandardClaimsFactory)(deleteDictDataEndpoint)
 
 	sysEndpoints := SysEndpoints{
 		ListCompanysEndpoint:    listCompanysEndpoint,
@@ -46,6 +55,9 @@ func CreateEndpoints(svc Service) SysEndpoints {
 		DeleteStaffEndpoint:     deleteStaffEndpoint,
 		ListStaffsEndpoint:      listStaffsEndpoint,
 		ListDictDataEndpoint:    listDictDataEndpoint,
+		AddDictDataEndpoint:     addDictDataEndpoint,
+		UpdateDictDataEndpoint:  updateDictDataEndpoint,
+		DeleteDictDataEndpoint:  deleteDictDataEndpoint,
 	}
 
 	return sysEndpoints
@@ -143,6 +155,51 @@ func MakeListDictDataEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(map[string]interface{})
 		result, err := svc.ListDict(req["scene"].(string), req["dictType"].(string))
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeAddDictEndpoint 添加字典
+func MakeAddDictEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.DictData)
+
+		result, err := svc.AddDict(req)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeUpdateDictEndpoint 修改字典
+func MakeUpdateDictEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.DictData)
+
+		result, err := svc.UpdateDict(req)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+// MakeDeleteDictEndpoint 删除字典
+func MakeDeleteDictEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(models.BaseModel)
+
+		result, err := svc.DeleteDict(req.ID)
 
 		if err != nil {
 			return nil, err

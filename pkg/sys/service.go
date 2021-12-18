@@ -27,6 +27,12 @@ type Service interface {
 	ListStaffs(name string, companyID uint, departmentID uint, pageIndex int, pageSize int) (*models.SearchResult, error)
 	// 获取字典列表
 	ListDict(scene string, dictType string) (*[]models.DictData, error)
+	// 添加字典
+	AddDict(dict models.DictData) (string, error)
+	// 修改字典
+	UpdateDict(dict models.DictData) (string, error)
+	// 删除字典
+	DeleteDict(id uint) (string, error)
 }
 
 // SysService 基础服务
@@ -265,4 +271,28 @@ func (s SysService) ListDict(scene string, dictType string) (*[]models.DictData,
 	}
 
 	return &dictDatas, nil
+}
+
+// 添加字典
+func (s SysService) AddDict(dict models.DictData) (string, error) {
+	if err := s.DB.Create(&dict).Error; err != nil {
+		return "", err
+	}
+	return "success", nil
+}
+
+// 修改字典
+func (s SysService) UpdateDict(dict models.DictData) (string, error) {
+	if err := s.DB.Save(&dict).Error; err != nil {
+		return "", err
+	}
+	return "success", nil
+}
+
+// 删除字典
+func (s SysService) DeleteDict(id uint) (string, error) {
+	if err := s.DB.Where("id = ?", id).Delete(&models.DictData{}).Error; err != nil {
+		return "", err
+	}
+	return "success", nil
 }

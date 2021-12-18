@@ -92,3 +92,33 @@ func (s InstrumentingMiddleware) ListDict(scene string, dictType string) (*[]mod
 
 	return s.Service.ListDict(scene, dictType)
 }
+
+// AddDict 添加字典
+func (s InstrumentingMiddleware) AddDict(dict models.DictData) (string, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "AddDict").Add(1)
+		s.requestLatency.With("method", "AddDict").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.AddDict(dict)
+}
+
+// UpdateDict 修改字典
+func (s InstrumentingMiddleware) UpdateDict(dict models.DictData) (string, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "UpdateDict").Add(1)
+		s.requestLatency.With("method", "UpdateDict").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.UpdateDict(dict)
+}
+
+// DeleteDict 删除字典
+func (s InstrumentingMiddleware) DeleteDict(id uint) (string, error) {
+	defer func(begin time.Time) {
+		s.requestCount.With("method", "DeleteDict").Add(1)
+		s.requestLatency.With("method", "DeleteDict").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return s.Service.DeleteDict(id)
+}
