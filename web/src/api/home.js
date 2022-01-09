@@ -19,7 +19,7 @@ export function getSlingStatByTon() {
 // 统计吊索具使用top
 export function getSlingUsedTop() {
   return request({
-    url: '/home/sling_used_top',
+    url: '/home/sling_used_top?topNum=10',
     method: 'get'
   })
 }

@@ -42,10 +42,11 @@ const actions = {
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: CryptoJS.SHA256(password + username.trim()).toString() }).then(response => {
+      login({ name: username.trim(), password: CryptoJS.SHA256(password + username.trim()).toString() }).then(response => {
         const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
+        const token = data.token.indexOf('Bearer') === 0 ? data.token : ('Bearer ' + data.token)
+        commit('SET_TOKEN', token)
+        setToken(token)
         resolve()
       }).catch(error => {
         reject(error)

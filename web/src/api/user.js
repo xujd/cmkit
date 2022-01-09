@@ -3,7 +3,7 @@ import CryptoJS from 'crypto-js'
 // 登录
 export function login(data) {
   return request({
-    url: '/auth/login',
+    url: '/login',
     method: 'post',
     data
   })
@@ -20,7 +20,7 @@ export function getInfo() {
 // 退出登录
 export function logout() {
   return request({
-    url: '/auth/logout',
+    url: '/logout',
     method: 'get'
   })
 }
